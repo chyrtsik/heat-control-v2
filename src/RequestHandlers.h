@@ -53,9 +53,8 @@ void handleApiGetStatus() {
   
   DEBUG_PRINT_LN("Processing GET /status");
 
-  StaticJsonDocument<BUFFER_SIZE> jsonDoc;
-  JsonObject root = jsonDoc.as<JsonObject>();
-
+  StaticJsonDocument<BUFFER_SIZE> root;
+  
   root["uptime"] = millis();
 
   JsonObject sensorsJson = root.createNestedObject("sensors");
@@ -78,7 +77,7 @@ void handleApiGetStatus() {
     valvesJson[valves[i]->getName()] = valves[i]->getValue();
   }
   
-  sendJsonResponse(jsonDoc);
+  sendJsonResponse(root);
   notBusy();
 }
 
@@ -87,9 +86,8 @@ void handleApiGetSensors() {
   
   DEBUG_PRINT_LN("Processing GET /sensors");
 
-  StaticJsonDocument<BUFFER_SIZE> jsonDoc;
-  JsonObject root = jsonDoc.as<JsonObject>();
-
+  StaticJsonDocument<BUFFER_SIZE> root;
+  
   int numberOfDevices = sensors.getDeviceCount();
   root["count"] = numberOfDevices;
   root["parasite"] = sensors.isParasitePowerMode() ? "on" : "off";
@@ -106,7 +104,7 @@ void handleApiGetSensors() {
     } 
   }
   
-  sendJsonResponse(jsonDoc);
+  sendJsonResponse(root);
 
   notBusy();
 }
@@ -120,9 +118,9 @@ void handleApiPutStatus() {
 
 void handleApiGetConfig() {
   busy();
+  DEBUG_PRINT_LN("Processing GET /config");
   
-  StaticJsonDocument<BUFFER_SIZE> jsonDoc;
-  JsonObject root = jsonDoc.as<JsonObject>();
+  StaticJsonDocument<BUFFER_SIZE> root;
   
   JsonArray relays = root.createNestedArray("termoRelays");
   for (int i = 0; i < termoRelaysCount; i++) {
@@ -133,7 +131,7 @@ void handleApiGetConfig() {
     relayConfig["offTemp"] = relay->getOffTemp();
   }
   
-  sendJsonResponse(jsonDoc);
+  sendJsonResponse(root);
   notBusy();
 }
   
@@ -141,33 +139,7 @@ void handleApiPutConfig() {
   busy();
   DEBUG_PRINT_LN("Processing PUT /config");
 
-  /*if (server.hasArg("switch")){
-    int switchNum = server.arg("switch").toInt();
-    if (switchesConfig.isValidSwitchNum(switchNum)){
-      DEBUG_PRINT_LN("Start updating switch config");
-      if (server.hasArg("name")){
-        switchesConfig.setSwitchName(switchNum, server.arg("name").c_str());
-        DEBUG_PRINT_LN("...updated switch name");
-      }
-      if (server.hasArg("enabled")){
-        switchesConfig.setSwithEnabled(switchNum, server.arg("enabled") == "true");
-        DEBUG_PRINT_LN("...updated switch enabled");
-      }
-      if (server.hasArg("onDelay")){
-        switchesConfig.setSwitchOnDelay(switchNum, server.arg("onDelay").toInt());
-        DEBUG_PRINT_LN("...updated switch onDelay");
-      }
-      if (server.hasArg("offDelay")){
-        switchesConfig.setSwitchOffDelay(switchNum, server.arg("offDelay").toInt());
-        DEBUG_PRINT_LN("...updated switch offDelay");
-      }
-      DEBUG_PRINT_LN("...before saving config to flash");
-      switchesConfig.save();
-      DEBUG_PRINT_LN("...saved new config");
-      sendResponse("text/plain" , "OK");
-      return;
-    }
-  }*/
+  //TODO - implement
 
   sendBadRequestResponse("Ignored. Check the request.");
 
