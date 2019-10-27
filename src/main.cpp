@@ -235,7 +235,7 @@ const int SERVER_PORT = 80;
 ESP8266WebServer server(SERVER_PORT);
 
 void processServer() {
-  server.handleClient();
+  //server.handleClient();
   registration.refresh();
 }
 

@@ -58,4 +58,5 @@ void ServoController::sendServoValue(int percent){
   servo.write(value);
   delay(activeTime);
   servo.detach();
+  DEBUG_PRINTF("Done sending value to servo %s\n", getName());
 }

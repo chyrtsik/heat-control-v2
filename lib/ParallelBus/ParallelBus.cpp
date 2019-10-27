@@ -1,6 +1,7 @@
 #include "ParallelBus.h"
 #include "../../include/Settings.h"
 #include <Arduino.h>
+#include <EspDebug.h>
 
 void ICACHE_RAM_ATTR _bus_pulsePin(int pin){
   digitalWrite(pin, HIGH);
