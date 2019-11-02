@@ -44,10 +44,20 @@ DeviceAddress &flueSensorAddress  = boardSensorAddress;
 
 //////////////////////////////////////////////
 // Parallel bus
+const int bits_no_select[] = {0,0,0,0,0,0,0,0};
+const int bits_all_select[] = {1,1,1,1,1,1,1,1};
+
+const int BUS_ADDR_A[] = {1,0,0};
+const int BUS_ADDR_B[] = {0,1,0};
+const int BUS_ADDR_C[] = {0,0,1};
+const int BUS_ADDR_ALL[] = {1,1,1};
+
 ParallelBus busA(BUS_ADDR_A);
 ParallelBus busB(BUS_ADDR_B);
 ParallelBus busC(BUS_ADDR_C);
 
+//////////////////////////////////////////////////
+// Water flow control
 Switch flowSensorPower(busA, 7, "flowSensor");
 FlowSensor flowSensor(PIN_DIGITAL_IO, &flowSensorPower);
 
@@ -235,14 +245,13 @@ const int SERVER_PORT = 80;
 ESP8266WebServer server(SERVER_PORT);
 
 void processServer() {
-  //server.handleClient();
+  server.handleClient();
   registration.refresh();
 }
 
 void connectToWiFi() {
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
-  //WiFi.setSleepMode(WIFI_NONE_SLEEP);
   DEBUG_PRINTF("Connecting to WiFi: %s\n", ssid);
 }
 
@@ -282,10 +291,11 @@ void setup() {
 }
 
 void loop() {
-  syncTermoRelays();  
-  flowSensor.syncSpeed(); 
+  //TODO - uncomment when fixed
+  //syncTermoRelays();  
+  //flowSensor.syncSpeed(); 
   processServer();  
   syncValves();
-  syncBus();
-  checkPumpRelay();
+  //syncBus();
+  //checkPumpRelay();
 }

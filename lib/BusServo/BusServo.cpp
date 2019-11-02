@@ -46,9 +46,6 @@ ServoTimer0 s_servoTimer0;
 ServoTimer1 s_servoTimer1;
 #endif
 
-#define _min(a,b) a < b ? a : b
-#define _max(a,b) a > b ? a : b
-
 static ServoState s_servos[MAX_SERVOS];     // static array of servo structures
 
 static uint8_t s_servoCount = 0;            // the total number of attached s_servos
