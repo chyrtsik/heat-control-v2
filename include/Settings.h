@@ -1,3 +1,6 @@
+#ifndef __SETTING_H__INCLUDED__
+#define __SETTING_H__INCLUDED__
+
 ////////////////////////////////////////////////////////////////////////////
 // Tunable settings (to be tuned and changes for each board)
 
@@ -68,14 +71,4 @@
 #define TEMPERATURE_PRECISION 10
 #define ERROR_TEMP_VALUE 85
 
-const int bits_no_select[] = {0,0,0,0,0,0,0,0};
-const int bits_all_select[] = {1,1,1,1,1,1,1,1};
-
-const int bits_fan_speed_1[] = {0,0,0,0,0,0,1,0};
-const int bits_fan_speed_2[] = {0,0,0,0,0,0,0,1};
-const int bits_fan_speed_3[] = {0,0,0,0,0,0,1,1};
-
-const int BUS_ADDR_A[] = {1,0,0};
-const int BUS_ADDR_B[] = {0,1,0};
-const int BUS_ADDR_C[] = {0,0,1};
-const int BUS_ADDR_ALL[] = {1,1,1};
+#endif //__SETTING_H__INCLUDED__

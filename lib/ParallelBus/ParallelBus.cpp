@@ -25,21 +25,3 @@ void ICACHE_RAM_ATTR _bus_sync(const int addr[], const int bits[]){
   _bus_sendBits(addr, bits);    
   interrupts();
 }
-
-ParallelBus::ParallelBus(const int *addr){
-  this->addr = addr;
-  sync(); //initialize on creation
-}
-
-void ParallelBus::sync(){
-  _bus_sync(addr, state);
-}
-
-void ParallelBus::setBit(int bitNo, bool isOn){
-  this->state[bitNo] = isOn ? 1 : 0;
-  _bus_sync(addr, state);
-}
-
-bool ParallelBus::getBit(int bitNo){
-  return this->state[bitNo] == 1 ? true : false;  
-}
