@@ -291,11 +291,10 @@ void setup() {
 }
 
 void loop() {
-  //TODO - uncomment when fixed
-  //syncTermoRelays();  
-  //flowSensor.syncSpeed(); 
+  syncTermoRelays();  
+  flowSensor.syncSpeed(); 
   processServer();  
   syncValves();
-  //syncBus();
-  //checkPumpRelay();
+  syncBus();
+  checkPumpRelay();
 }
