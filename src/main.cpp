@@ -21,11 +21,12 @@
 #include "WiFiCredentials.h"
 #include "Settings.h"
 
-//const char *SERVICE_NAME = "boiler-v2";    
-const char *SERVICE_NAME = "boiler-v2-dev";    //"-dev" indicates development board. Remove when merging to master.
-
 //////////////////////////////////////////////////
 //Temperature sensors addresses (do not forget to disable dev board sensors upon merge)
+
+#ifdef DEBUG_BOARD
+
+const char *SERVICE_NAME = "boiler-v2-dev";    //"-dev" indicates development board.
 DeviceAddress boardSensorAddress   = {40, 255, 81, 242, 35, 23, 3, 118};   //DEV board sensor
 DeviceAddress &boilerSensorAddress = boardSensorAddress;
 DeviceAddress &feedSensorAddress   = boardSensorAddress;
@@ -34,13 +35,18 @@ DeviceAddress &outsideSensorAddress = boardSensorAddress;
 DeviceAddress &insideSensorAddress  = boardSensorAddress;
 DeviceAddress &flueSensorAddress  = boardSensorAddress;
 
-// DeviceAddress boardSensorAddress   = {40, 255, 239, 232,  35,  23,  3, 184};   //Different for each board
-// DeviceAddress boilerSensorAddress  = {40,   0,   9,   0, 226,  56, 34, 161};
-// DeviceAddress feedSensorAddress    = {40,   0,   9,   0,   1, 110, 34,  95};
-// DeviceAddress returnSensorAddress  = {40,   0,   9,   0, 245,  57, 34,  85};
-// DeviceAddress outsideSensorAddress = {40, 255,  45, 233,  35,  23,  3, 150};
-// DeviceAddress insideSensorAddress  = {40, 255, 228,  13,  36,  23,  3, 122};
-// DeviceAddress flueSensorAddress  =   {40, 255, 232,  17,  36,  23,  3, 113};
+#else //DEBUG_BOARD
+
+const char *SERVICE_NAME = "boiler-v2";    
+DeviceAddress boardSensorAddress   = {40, 255, 239, 232,  35,  23,  3, 184};   //Different for each board
+DeviceAddress boilerSensorAddress  = {40,   0,   9,   0, 226,  56, 34, 161};
+DeviceAddress feedSensorAddress    = {40,   0,   9,   0,   1, 110, 34,  95};
+DeviceAddress returnSensorAddress  = {40,   0,   9,   0, 245,  57, 34,  85};
+DeviceAddress outsideSensorAddress = {40, 255,  45, 233,  35,  23,  3, 150};
+DeviceAddress insideSensorAddress  = {40, 255, 228,  13,  36,  23,  3, 122};
+DeviceAddress flueSensorAddress  =   {40, 255, 232,  17,  36,  23,  3, 113};
+
+#endif
 
 //////////////////////////////////////////////
 // Parallel bus
@@ -290,6 +296,8 @@ void setup() {
   setupServer();
 }
 
+#ifndef DEBUG_MODE
+
 void loop() {
   syncTermoRelays();  
   flowSensor.syncSpeed(); 
@@ -298,3 +306,11 @@ void loop() {
   syncBus();
   checkPumpRelay();
 }
+
+#else //DEBUG_MODE
+#include "DebugMode.h"
+
+void loop(){
+  debugLoop();
+}
+#endif
