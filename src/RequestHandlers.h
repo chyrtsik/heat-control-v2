@@ -26,13 +26,17 @@ void sendBadRequestResponse(const char *content) {
   server.send(400, "application/json", content);
 }
 
+String calculateVersion(){
+  return String(__DATE__) + " " + __TIME__;
+}
+
 void handleGetRoot() {
   busy();
   
   DEBUG_PRINT_LN("Processing GET /");
 
   String response = "<p>Build date and time: ";
-  response = response + __DATE__ + " " + __TIME__ + "</p>";
+  response = calculateVersion() + "</p>";
 
   unsigned long currentTime = millis();
   int seconds = (currentTime / 1000) % 60;
@@ -55,8 +59,9 @@ void handleApiGetStatus() {
 
   StaticJsonDocument<BUFFER_SIZE> root;
   
+  root["version"] = calculateVersion();
   root["uptime"] = millis();
-
+  
   JsonObject sensorsJson = root.createNestedObject("sensors");
   for(int i=0; i<tempSensorsCount; i++){
     sensorsJson[tempSensors[i]->getName()] = tempSensors[i]->getTemperature();
@@ -72,11 +77,14 @@ void handleApiGetStatus() {
   flowSensorJson["litresTotal"] = flowSensor.getLitresTotal(); 
   flowSensorJson["litresPerMinute"] = flowSensor.getLitresPerMinute();
   
+  JsonObject powerJson = root.createNestedObject("power");
+  powerJson["heating"] = calculateCurrentPower(); 
+
   JsonObject valvesJson = root.createNestedObject("valves");
   for(int i=0; i<valvesCount; i++) {
     valvesJson[valves[i]->getName()] = valves[i]->getValue();
   }
-  
+
   sendJsonResponse(root);
   notBusy();
 }
