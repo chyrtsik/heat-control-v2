@@ -138,6 +138,11 @@ void ICACHE_RAM_ATTR bus_digitalWrite(uint8_t pin, uint8_t val){
   busB.setBit(pin, val == HIGH);
 }
 
+float calculateCurrentPower(){
+  //P = c*(T1-T0)*dm/dt
+  return 4.2 * (feedTemp.getTemperature() - returnTemp.getTemperature()) * flowSensor.getLitresPerMinute() / 60.0;
+}
+
 int calculateFlueValveValue(){
   float temperature = max(flueTemp.getTemperature(), boilerTemp.getTemperature());
   if (temperature < -100){
@@ -182,6 +187,7 @@ int valvesCount = sizeof(valves) / sizeof(valves[0]);
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 // Controller setup and main loop
+
 unsigned long lastPumpCheckTime = 0;
 void checkPumpRelay(){
   if (lastPumpCheckTime == 0 || millis() - lastPumpCheckTime > PUMP_CHECK_DELAY){
