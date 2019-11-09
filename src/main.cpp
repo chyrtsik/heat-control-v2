@@ -136,7 +136,7 @@ bool calculateCoolerCondition(bool isOn){
   bool onForBoiler = boilerTemperature >= BOILER_COOLER_ON || (isOn && boilerTemperature > BOILER_COOLER_OFF);
   
   float flueTemperature = flueTemp.getTemperature();
-  bool onForFlue = flueTemperature >= FLUE_COOLER_ON || (isOn && flueTemperature > FLUE_COOLER_ON); 
+  bool onForFlue = flueTemperature >= FLUE_COOLER_ON || (isOn && flueTemperature > FLUE_COOLER_OFF); 
 
   return onForBoiler || onForFlue; 
 }
