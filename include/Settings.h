@@ -21,8 +21,11 @@
 #define HEATER_3_ON  15  //Temperature to turn on the third heater 
 #define HEATER_3_OFF 42  //Temperature to turn off the first heater
 
-#define COOLER_ON 85    //Temperature to start cooler to prevent overheating
-#define COOLER_OFF 75   //Temperature to stop cooler 
+#define BOILER_COOLER_ON 85    //Boiler temperature to start cooler to prevent overheating
+#define BOILER_COOLER_OFF 75   //Boiler temperature to stop cooler 
+
+#define FLUE_COOLER_ON  110  //Flue temperature to start cooler to prevent teprerature sensors overheating
+#define FLUE_COOLER_OFF 75   //Flue temperature to stop cooler 
 
 // Timings
 #define BUS_SYNC_DELAY     1000       //Delay between resyncing state of the parallel bus
