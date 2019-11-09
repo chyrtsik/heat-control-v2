@@ -40,11 +40,15 @@ void ServoController::syncValue(){
     int newValue = getValueFn();
     if (abs(newValue - currentValue) >= 5){
       //Move servo only in case of significant value changes - make less noises and save servo's live.
-      currentValue = newValue;
-      sendServoValue(currentValue);
+      setValue(newValue);
     }
     lastServoSyncTime = millis(); 
   }
+}
+
+void ServoController::setValue(int percent){
+  currentValue = percent;
+  sendServoValue(currentValue);
 }
 
 boolean ServoController::isTimeForSync(unsigned long lastSyncTime, unsigned long syncInterval){
