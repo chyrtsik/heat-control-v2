@@ -15,6 +15,7 @@
 #include <ConsulRegistration.h>
 #include <FlowSensor.h>
 #include <TermoRelay.h>
+#include <ConditionalRelay.h>
 #include <ServoController.h>
 #include <TemperatureSensor.h>
 
@@ -102,24 +103,19 @@ int tempSensorsCount = sizeof(tempSensors) / sizeof(tempSensors[0]);
 ////////////////////////////////////////////////
 // Relays (bit 0 = relay 1, bit 1 = relay 2 etc)
 Switch pumpRelay(busA, 0, "pump");
+Switch pump2Relay(busA, 1, "pump2"); //Placeholder for now. This is a support for secondary pump
+Switch heaterRelay1(busA, 3, "heater1");
+Switch heaterRelay2(busA, 4, "heater2");
+Switch heaterRelay3(busA, 5, "heater3");
+Switch coolerRelay(busA, 2, "cooler");
+
 TermoRelay pump(HEATING_PUMP_ON, HEATING_PUMP_OFF, &pumpRelay, &ledAlarm, true);
 TermoRelay pumpNoFreeze(ANTIFREEZE_PUMP_ON, ANTIFREEZE_PUMP_OFF, &pumpRelay, &ledAlarm, true);
-
-Switch pump2Relay(busA, 1, "pump2"); //Placeholder for now. This is a support for secondary pump
-
-Switch heaterRelay1(busA, 3, "heater1");
 TermoRelay heater1(HEATER_1_ON, HEATER_1_OFF, &heaterRelay1, &ledAlarm); 
-
-Switch heaterRelay2(busA, 4, "heater2");
 TermoRelay heater2(HEATER_2_ON, HEATER_2_OFF, &heaterRelay2, &ledAlarm); 
-
-Switch heaterRelay3(busA, 5, "heater3");
 TermoRelay heater3(HEATER_3_ON, HEATER_3_OFF, &heaterRelay3, &ledAlarm); 
 
-Switch coolerRelay(busA, 2, "cooler");
-TermoRelay cooler(COOLER_ON, COOLER_OFF, &coolerRelay, &ledAlarm); 
-
-TermoRelay* termoRelays[] = {&pumpNoFreeze, &pump, &heater1, &heater2, &heater3, &cooler}; 
+TermoRelay* termoRelays[] = {&pumpNoFreeze, &pump, &heater1, &heater2, &heater3}; 
 int termoRelaysCount = sizeof(termoRelays) / sizeof(termoRelays[0]);
 
 TermoRelay* boilerDependentTermoRelays[] = {&pumpNoFreeze, &pump, &heater1, &heater2, &heater3}; 
@@ -133,6 +129,18 @@ Switch* switches[] = {
   &ledWiFi, &ledConsul, &ledTemp, &ledBusy, &ledAlarm
 };
 int switchesCount = sizeof(switches) / sizeof(switches[0]);
+
+
+bool calculateCoolerCondition(bool isOn){
+  float boilerTemperature = boilerTemp.getTemperature();
+  bool onForBoiler = boilerTemperature >= BOILER_COOLER_ON || (isOn && boilerTemperature > BOILER_COOLER_OFF);
+  
+  float flueTemperature = flueTemp.getTemperature();
+  bool onForFlue = flueTemperature >= FLUE_COOLER_ON || (isOn && flueTemperature > FLUE_COOLER_ON); 
+
+  return onForBoiler || onForFlue; 
+}
+ConditionalRelay cooler(&coolerRelay, calculateCoolerCondition); 
 
 //////////////////////////////////////////////////////////////////////////
 // Servos
@@ -230,9 +238,8 @@ void syncTermoRelays(){
       boilerDependentTermoRelays[i]->processTemp(currentBoilerTemp);
     }
 
-    //Relays, dependent on current flue temperature.
-    float maxBoileOrFlueTemp = max(currentBoilerTemp, flueTemp.getTemperature());
-    cooler.processTemp(maxBoileOrFlueTemp);
+    //Conditional relays.
+    cooler.sync();
     
     lastSyncTime = millis();
   }
