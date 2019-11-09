@@ -117,10 +117,53 @@ void handleApiGetSensors() {
   notBusy();
 }
 
+bool applyNewStatus(){
+  for (int i = 0; i < server.args(); i++){
+    String argName = server.argName(i);
+    if (argName.startsWith("switches.")){
+      //Turn on / off switch by name
+      String switchName = argName.substring(9);
+      for (int s = 0; s < switchesCount; s++){
+        if (switchName.equals(switches[s]->getName())){
+          String switchValue = server.arg(i);
+          if (switchValue.equals("on")){
+            DEBUG_PRINTF("Turning on switch %s\n", switchName.c_str());
+            switches[s]->turnOn();  
+          }
+          else if (switchValue.equals("off")){
+            DEBUG_PRINTF("Turning off switch %s\n", switchName.c_str());
+            switches[s]->turnOff();
+          }
+        }
+      }
+    }
+    else if (argName.startsWith("valves.")){
+      //Change valve value by name
+      String valveName = argName.substring(7);
+      for (int v = 0; v < valvesCount; v++){
+        if (valveName.equals(valves[v]->getName())){
+          String valveValue = server.arg(i);
+          int intValue = valveValue.toInt();
+          if (intValue >= 0 && intValue <= 100){
+            DEBUG_PRINTF("Setting valve %s to to value %d\n", valveName.c_str(), intValue);
+            valves[v]->setValue(intValue);  
+          }
+        }
+      }
+    }
+  }
+  return true;
+}
+
 void handleApiPutStatus() {
   busy();
   DEBUG_PRINT_LN("Processing PUT /status");
-  sendBadRequestResponse("Not supported yet");
+  if (applyNewStatus()){
+    sendTextResponse("OK");
+  }
+  else{
+    sendBadRequestResponse("Ignored. Check the arguments.");
+  }
   notBusy();
 }
 

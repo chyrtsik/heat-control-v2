@@ -27,7 +27,8 @@ class ServoController {
     const char *getName();
 
     const int getValue();
-    //TODO - add here mapping from the percent to the actual value
+  
+    void setValue(int percent);
 
   private:
     void syncAntiStall();
@@ -35,7 +36,7 @@ class ServoController {
     void syncValue();
 
     boolean isTimeForSync(unsigned long lastSyncTime, unsigned long syncInterval);
-  
+
     void sendServoValue(int percent);
 };
 

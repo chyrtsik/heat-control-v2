@@ -125,7 +125,13 @@ int termoRelaysCount = sizeof(termoRelays) / sizeof(termoRelays[0]);
 TermoRelay* boilerDependentTermoRelays[] = {&pumpNoFreeze, &pump, &heater1, &heater2, &heater3}; 
 int boilerDependentTermoRelaysCount = sizeof(boilerDependentTermoRelays) / sizeof(boilerDependentTermoRelays[0]);
 
-Switch* switches[] = {&pumpRelay, &heaterRelay1, &heaterRelay2, &heaterRelay3, &coolerRelay, &flowSensorPower, &ledWiFi, &ledConsul, &ledTemp, &ledBusy, &ledAlarm};
+Switch* switches[] = {
+  &pumpRelay, &pump2Relay, 
+  &heaterRelay1, &heaterRelay2, &heaterRelay3, 
+  &coolerRelay, 
+  &flowSensorPower, 
+  &ledWiFi, &ledConsul, &ledTemp, &ledBusy, &ledAlarm
+};
 int switchesCount = sizeof(switches) / sizeof(switches[0]);
 
 //////////////////////////////////////////////////////////////////////////
