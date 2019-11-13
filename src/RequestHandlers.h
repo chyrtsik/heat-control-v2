@@ -45,8 +45,13 @@ void handleGetRoot() {
   int days = currentTime / (24 * 60 * 60 * 1000);
   response = response + "<p>Uptime: " + days + " days " + hours + " hours " + minutes + " minutes " + seconds + " seconds" + "</p>";
 
-  response = response + "<p>Endpoints available: <ul><li>GET /api/status</li><li>GET|PUT /api/config</li><li>GET /api/sensors</li></ul></p>";
+  response = response + "<p>Endpoints available: <ul><li>GET/PUT /api/status</li><li>GET|PUT /api/config</li><li>GET /api/sensors</li></ul></p>";
 
+  response = response + "</p>";
+
+  response = response + "<form method='POST' action='/status?switches.heater2=on&switches.heater3=on'><input type='submit' value='Electric heating ON' style='width: 100%;height: 20%;font-size: xx-large;'></form>";
+  response = response + "<form method='POST' action='/status?switches.heater2=off&switches.heater3=off'><input type='submit' value='Electric heating OFF' style='width: 100%;height: 20%;font-size: xx-large;'></form>";
+  
   sendHtmlResponse(response.c_str());
 
   notBusy();
@@ -167,6 +172,20 @@ void handleApiPutStatus() {
   notBusy();
 }
 
+void handlePostStatus(){
+  busy();
+  DEBUG_PRINT_LN("Processing POST /status");
+
+  if (applyNewStatus()){
+    sendHtmlResponse("<html><head><meta http-equiv='refresh' content='2;url=/'/></head><body>OK</body></html>");
+  }
+  else{
+    sendBadRequestResponse("Ignored. Check the request.");
+  }
+  
+  notBusy();
+}
+
 void handleApiGetConfig() {
   busy();
   DEBUG_PRINT_LN("Processing GET /config");
@@ -197,19 +216,6 @@ void handleApiPutConfig() {
   notBusy();
 }
 
-
-void handlePostStatus(){
-  busy();
-  DEBUG_PRINT_LN("Processing POST /status");
-
-  /*if (applyNewStatus()){
-    sendHtmlResponse("<html><head><meta http-equiv='refresh' content='2;url=/'/></head><body>OK</body></html>");
-  }
-  else{*/
-    sendBadRequestResponse("Ignored. Check the request.");
-  //}
-  notBusy();
-} 
 
 void handleGetUpdate(){
   busy();
