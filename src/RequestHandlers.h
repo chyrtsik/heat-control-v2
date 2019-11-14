@@ -1,6 +1,6 @@
 ////////////////////////////////
 // Requests  hanglers
-const int BUFFER_SIZE = 1200;
+const int BUFFER_SIZE = 1024;
 
 void sendResponse(const char *contentType, const char *content) {
   server.sendHeader("Connection", "close");
