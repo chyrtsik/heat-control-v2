@@ -1,6 +1,6 @@
 ////////////////////////////////
 // Requests  hanglers
-const int BUFFER_SIZE = 1024;
+const int BUFFER_SIZE = 1200;
 
 void sendResponse(const char *contentType, const char *content) {
   server.sendHeader("Connection", "close");
@@ -35,23 +35,42 @@ void handleGetRoot() {
   
   DEBUG_PRINT_LN("Processing GET /");
 
-  String response = "<p>Build date and time: ";
-  response = calculateVersion() + "</p>";
+  //Monitoring
+  String response = "<style>#monitoring{width: 100%;} .value{font-size: xx-large;} </style>";
+  response += "<table id=\"monitoring\"><tbody><tr><td class=\"value\">";
+  response += boilerTemp.getTemperature();
+  response += "&deg;C</td><td class=\"value\">";
+  response += calculateCurrentPower();
+  response += "KW</td><td class=\"value\">";
+  response += flowSensor.getLitresPerMinute();
+  response += "L/min</td><td class=\"value\">";
+  response += insideTemp.getTemperature();
+  response += "&deg;C</td><td class=\"value\">";
+  response += outsideTemp.getTemperature();
+  response += "&deg;C</td>";
+  response += "</tr><tr><td>boiler</td><td>power</td><td>flow</td><td>inside</td><td>outside</td></tr></tbody></table>";
 
-  unsigned long currentTime = millis();
-  int seconds = (currentTime / 1000) % 60;
-  int minutes = (currentTime / (60 * 1000)) % 60;
-  int hours = (currentTime / (60 * 60 * 1000)) % 24;
-  int days = currentTime / (24 * 60 * 60 * 1000);
-  response = response + "<p>Uptime: " + days + " days " + hours + " hours " + minutes + " minutes " + seconds + " seconds" + "</p>";
+  //Heating control
+  response += "</p>";
+  response += "<form method='POST' action='/status?switches.heater2=on&switches.heater3=on'><input type='submit' value='Electric heating ON' style='width: 100%;height: 20%;font-size: xx-large;'></form>";
+  response += "<form method='POST' action='/status?switches.heater2=off&switches.heater3=off'><input type='submit' value='Electric heating OFF' style='width: 100%;height: 20%;font-size: xx-large;'></form>";
 
-  response = response + "<p>Endpoints available: <ul><li>GET/PUT /api/status</li><li>GET|PUT /api/config</li><li>GET /api/sensors</li></ul></p>";
+  //Version of other info  
+  response += "<p>Build date and time: " + calculateVersion() + "</p>";
+  // unsigned long currentTime = millis();
+  // int seconds = (currentTime / 1000) % 60;
+  // int minutes = (currentTime / (60 * 1000)) % 60;
+  // int hours = (currentTime / (60 * 60 * 1000)) % 24;
+  // int days = currentTime / (24 * 60 * 60 * 1000);
+  // response += "<p>Uptime: ";
+  // response += days + " days ";
+  // response += hours + " hours ";
+  // response += minutes + " minutes ";
+  // response += seconds + " seconds </p>";
 
-  response = response + "</p>";
+  // response += "<p>Endpoints available: <ul><li>GET/PUT /api/status</li><li>GET|PUT /api/config</li><li>GET /api/sensors</li></ul></p>";
 
-  response = response + "<form method='POST' action='/status?switches.heater2=on&switches.heater3=on'><input type='submit' value='Electric heating ON' style='width: 100%;height: 20%;font-size: xx-large;'></form>";
-  response = response + "<form method='POST' action='/status?switches.heater2=off&switches.heater3=off'><input type='submit' value='Electric heating OFF' style='width: 100%;height: 20%;font-size: xx-large;'></form>";
-  
+
   sendHtmlResponse(response.c_str());
 
   notBusy();
