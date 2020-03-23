@@ -19,7 +19,7 @@
 #define HEATER_2_OFF 40  //Temperature to turn off the first heater
 
 #define HEATER_3_ON  15  //Temperature to turn on the third heater 
-#define HEATER_3_OFF 42  //Temperature to turn off the first heater
+#define HEATER_3_OFF 43  //Temperature to turn off the first heater
 
 #define BOILER_COOLER_ON 85    //Boiler temperature to start cooler to prevent overheating
 #define BOILER_COOLER_OFF 75   //Boiler temperature to stop cooler 
