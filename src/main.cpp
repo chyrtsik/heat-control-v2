@@ -175,9 +175,9 @@ int calculateFlueValveValue(){
 
 int calculateBoilerValveValue(){
   //Decide boiler temperature from the outside temperature
-  const int minTemperatureValue = 10; //Servo position with min temperature
+  const int minTemperatureValue = 20; //Servo position with min temperature
   const int maxTemperatureValue = 100; //Servo position with max temperature
-  const int maxOutsideTemperature = 0;
+  const int maxOutsideTemperature = 10;
   const int minOutsideTemperature = -20;
   float temperature = outsideTemp.getTemperature();
   if (temperature < -100){
