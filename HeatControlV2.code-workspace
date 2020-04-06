@@ -18,7 +18,13 @@
 			"unordered_map": "cpp",
 			"vector": "cpp",
 			"initializer_list": "cpp",
-			"*.tcc": "cpp"
+			"*.tcc": "cpp",
+			"functional": "cpp",
+			"random": "cpp",
+			"fstream": "cpp",
+			"istream": "cpp",
+			"ostream": "cpp",
+			"streambuf": "cpp"
 		}
 	}
 }

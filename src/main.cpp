@@ -1,26 +1,42 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
+
+#include <EspDebug.h>
+#include <ParallelBus.h>
+
+#include <ESP8266WiFi.h>
+
+#ifndef DEBUG_MODE
 #include <OneWire.h> 
 #include <DallasTemperature.h>
 #include <EEPROM.h>
-#include <ESP8266WiFi.h>
 #include <WiFiClient.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
 
-#include <EspDebug.h>
-#include <ParallelBus.h>
 #include <BusServo.h>
 #include <Switch.h>
 #include <ConsulRegistration.h>
+#include <FlowSensor.h>
 #include <FlowSensor.h>
 #include <TermoRelay.h>
 #include <ConditionalRelay.h>
 #include <ServoController.h>
 #include <TemperatureSensor.h>
+#endif //DEBUG_MODE
 
 #include "WiFiCredentials.h"
 #include "Settings.h"
+
+//////////////////////////////////////////////
+// Parallel bus
+const int BUS_ADDR_A[] =   {0,0,1,0,0,0,0,0};
+const int BUS_ADDR_B[] =   {0,1,0,0,0,0,0,0};
+
+ParallelBus busA(BUS_ADDR_A, ADDR_LEN, STATE_LEN);
+ParallelBus busB(BUS_ADDR_B, ADDR_LEN, STATE_LEN);
+
+#ifndef DEBUG_MODE
 
 //////////////////////////////////////////////////
 //Temperature sensors addresses (do not forget to disable dev board sensors upon merge)
@@ -28,7 +44,7 @@
 #ifdef DEBUG_BOARD
 
 const char *SERVICE_NAME = "boiler-v2-dev";    //"-dev" indicates development board.
-DeviceAddress boardSensorAddress   = {40, 255, 81, 242, 35, 23, 3, 118};   //DEV board sensor
+DeviceAddress boardSensorAddress   = {40, 255, 230, 219, 35, 23, 3, 139};   //DEV board sensor
 DeviceAddress &boilerSensorAddress = boardSensorAddress;
 DeviceAddress &feedSensorAddress   = boardSensorAddress;
 DeviceAddress &returnSensorAddress  = boardSensorAddress;
@@ -39,7 +55,7 @@ DeviceAddress &flueSensorAddress  = boardSensorAddress;
 #else //DEBUG_BOARD
 
 const char *SERVICE_NAME = "boiler-v2";    
-DeviceAddress boardSensorAddress   = {40, 255, 239, 232,  35,  23,  3, 184};   //Different for each board
+DeviceAddress boardSensorAddress   = {40, 255, 230, 219,  35,  23,  3, 139};   //Different for each board
 DeviceAddress boilerSensorAddress  = {40,   0,   9,   0, 226,  56, 34, 161};
 DeviceAddress feedSensorAddress    = {40,   0,   9,   0,   1, 110, 34,  95};
 DeviceAddress returnSensorAddress  = {40,   0,   9,   0, 245,  57, 34,  85};
@@ -49,32 +65,18 @@ DeviceAddress flueSensorAddress  =   {40, 255, 232,  17,  36,  23,  3, 113};
 
 #endif
 
-//////////////////////////////////////////////
-// Parallel bus
-const int bits_no_select[] = {0,0,0,0,0,0,0,0};
-const int bits_all_select[] = {1,1,1,1,1,1,1,1};
-
-const int BUS_ADDR_A[] = {1,0,0};
-const int BUS_ADDR_B[] = {0,1,0};
-const int BUS_ADDR_C[] = {0,0,1};
-const int BUS_ADDR_ALL[] = {1,1,1};
-
-ParallelBus busA(BUS_ADDR_A);
-ParallelBus busB(BUS_ADDR_B);
-ParallelBus busC(BUS_ADDR_C);
-
 //////////////////////////////////////////////////
 // Water flow control
-Switch flowSensorPower(busA, 7, "flowSensor");
-FlowSensor flowSensor(PIN_DIGITAL_IO, &flowSensorPower);
+Switch flowSensorPower(busB, BUS_BIT_8, "flowSensor"); 
+FlowSensor flowSensor(PIN_DIGITAL_IO1, &flowSensorPower);
 
 ////////////////////////////////////////////////
 // LED indicators
-Switch ledWiFi(busB, 0, "ledWifi");
-Switch ledConsul(busB, 1, "ledConsul");
-Switch ledTemp(busB, 2, "ledTemp");
-Switch ledBusy(busB, 3, "ledBusy");
-Switch ledAlarm(busB, 4, "ledAlarm");
+Switch ledWiFi(busB, BUS_BIT_1, "ledWifi");     
+Switch ledConsul(busB, BUS_BIT_2, "ledConsul"); 
+Switch ledTemp(busB, BUS_BIT_3, "ledTemp");     
+Switch ledBusy(busB, BUS_BIT_4, "ledBusy");     
+Switch ledAlarm(busB, BUS_BIT_5, "ledAlarm");   
 
 void busy(){
   ledBusy.turnOn();  
@@ -102,12 +104,12 @@ int tempSensorsCount = sizeof(tempSensors) / sizeof(tempSensors[0]);
   
 ////////////////////////////////////////////////
 // Relays (bit 0 = relay 1, bit 1 = relay 2 etc)
-Switch pumpRelay(busA, 0, "pump");
-Switch pump2Relay(busA, 1, "pump2"); //Placeholder for now. This is a support for secondary pump
-Switch heaterRelay1(busA, 3, "heater1");
-Switch heaterRelay2(busA, 4, "heater2");
-Switch heaterRelay3(busA, 5, "heater3");
-Switch coolerRelay(busA, 2, "cooler");
+Switch pumpRelay(busA, BUS_BIT_1, "pump");       
+Switch pump2Relay(busA, BUS_BIT_2, "pump2");
+Switch heaterRelay1(busA, BUS_BIT_3, "heater1");
+Switch heaterRelay2(busA, BUS_BIT_4, "heater2");
+Switch heaterRelay3(busA, BUS_BIT_5, "heater3");
+Switch coolerRelay(busA, BUS_BIT_6, "cooler");
 
 TermoRelay pump(HEATING_PUMP_ON, HEATING_PUMP_OFF, &pumpRelay, &ledAlarm, true);
 TermoRelay pumpNoFreeze(ANTIFREEZE_PUMP_ON, ANTIFREEZE_PUMP_OFF, &pumpRelay, &ledAlarm, true);
@@ -168,7 +170,7 @@ int calculateFlueValveValue(){
   else if (temperature >= 100){
     return 80;  
   }
-  else{
+  else{ 
     return 80 - 80 * (1 - (temperature - 20) / (100.0 - 20.0)); //Linear scale between 20 and 100 celsius (20 = 100%, 100 = 0%)  
   } 
 }
@@ -223,7 +225,6 @@ void syncBus(){
     //Flush states to buses (to prevent them from random status changes due to interference)	
     busA.sync();
     busB.sync();
-    busC.sync();
     lastBusSyncTime = millis();
   }
 }
@@ -315,8 +316,6 @@ void setup() {
   setupServer();
 }
 
-#ifndef DEBUG_MODE
-
 void loop() {
   syncTermoRelays();  
   flowSensor.syncSpeed(); 
@@ -328,6 +327,10 @@ void loop() {
 
 #else //DEBUG_MODE
 #include "DebugMode.h"
+
+void setup() {
+  debugSetup();
+}
 
 void loop(){
   debugLoop();
