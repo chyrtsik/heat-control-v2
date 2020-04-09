@@ -5,8 +5,11 @@
 // Tunable settings (to be tuned and changes for each board)
 
 // Temperature settings
-#define HEATING_PUMP_ON 35   //Temperature when heating pump starts
-#define HEATING_PUMP_OFF 30  //Temperature when heating pump stops (to prevent heating loss)
+#define HEATING_PUMP_ON 35          //Temperature when heating pump starts
+#define HEATING_PUMP_OFF 30         //Temperature when heating pump stops (to prevent heating loss)
+
+#define HEATING_PUMP_CHECK_TEMP 55  //Temperature when need to restart pump in case of no flow
+#define HEATING_PUMP_IDLE_TEMP  50  //Temperature when pump can be checked for being idle (higher temperatures doe not allow to switch pump off)
 
 #define ANTIFREEZE_PUMP_ON  5  //Temperature when pump start to prevent boiler freeze
 #define ANTIFREEZE_PUMP_OFF 10 //Temperature when pump stops (freezing has been prevented)
@@ -15,11 +18,11 @@
 #define HEATER_1_ON  0 //Temperature to turn on the first heater
 #define HEATER_1_OFF 5 //Temperature to turn off the first heater
 
-#define HEATER_2_ON  15  //Temperature to turn on the second heater
-#define HEATER_2_OFF 40  //Temperature to turn off the first heater
+#define HEATER_2_ON  38  //Temperature to turn on the second heater
+#define HEATER_2_OFF 42  //Temperature to turn off the first heater
 
-#define HEATER_3_ON  15  //Temperature to turn on the third heater 
-#define HEATER_3_OFF 43  //Temperature to turn off the first heater
+#define HEATER_3_ON  40  //Temperature to turn on the third heater 
+#define HEATER_3_OFF 50  //Temperature to turn off the first heater
 
 #define BOILER_COOLER_ON 85    //Boiler temperature to start cooler to prevent overheating
 #define BOILER_COOLER_OFF 75   //Boiler temperature to stop cooler 
@@ -30,7 +33,9 @@
 // Timings
 #define BUS_SYNC_DELAY     1000       //Delay between resyncing state of the parallel bus
 #define TERMO_SYNC_DELAY   10000      //Delay between temperaature sensor readings
-#define PUMP_CHECK_DELAY   10000      //Delay between checks if pump relay is in a correct state
+#define PUMP_CHECK_DELAY   60000      //Delay between checks if pump relay is in a correct state
+#define PUMP_IDLE_CHECK_DELAY 120000  //Delay between checks if pump can be turned off
+#define PUMP_IDLE_OFF_DELAY 600000    //Delat to turn off pump
 
 //Valves configuration (controlled by servos)
 #define FLUE_VALVE_PIN                    5        //B6

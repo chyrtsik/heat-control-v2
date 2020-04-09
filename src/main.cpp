@@ -203,9 +203,9 @@ int valvesCount = sizeof(valves) / sizeof(valves[0]);
 // Controller setup and main loop
 
 unsigned long lastPumpCheckTime = 0;
-void checkPumpRelay(){
+void checkPumpRelay(float boilerTemperature){
   if (lastPumpCheckTime == 0 || millis() - lastPumpCheckTime > PUMP_CHECK_DELAY){
-    if (pumpRelay.isOn() && flowSensor.getTicks() > 0 && flowSensor.getLitresPerMinute() < 0.01){
+    if (boilerTemperature >= HEATING_PUMP_CHECK_TEMP && pumpRelay.isOn() && flowSensor.getTicks() > 0 && flowSensor.getLitresPerMinute() < 0.01){
       //Pump is supposed to be on, but there is no flow, pump relay might be reset. Need to switch it on again.
       ledAlarm.turnOn();
       pumpRelay.turnOff();
@@ -215,6 +215,11 @@ void checkPumpRelay(){
     }
     lastPumpCheckTime = millis();
   }
+}
+
+void checkPump(){
+  float boilerTemperature = boilerTemp.getTemperature();
+  checkPumpRelay(boilerTemperature);
 }
 
 unsigned long lastBusSyncTime = 0;
@@ -323,7 +328,7 @@ void loop() {
   processServer();  
   syncValves();
   syncBus();
-  checkPumpRelay();
+  checkPump();
 }
 
 #else //DEBUG_MODE

@@ -6,7 +6,7 @@
 class FlowSensor {
   private:
     const float LITRES_PER_TICK = 0.005; //Results of calibration. See excel sheet.
-    const unsigned int SPEED_MEASUREMENT_INTERVAL = 5000;
+    const unsigned int SPEED_MEASUREMENT_INTERVAL = 60000;
     
     unsigned long lastSpeedMeasurement = 0;
     unsigned long lastTicks = 0;
