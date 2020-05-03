@@ -22,6 +22,8 @@
 #include "WiFiCredentials.h"
 #include "Settings.h"
 
+#include <Workflow.h>
+
 //////////////////////////////////////////////////
 //Temperature sensors addresses (do not forget to disable dev board sensors upon merge)
 
@@ -317,6 +319,8 @@ void setup() {
 
 #ifndef DEBUG_MODE
 
+Workflow workflow;
+
 void loop() {
   syncTermoRelays();  
   flowSensor.syncSpeed(); 
@@ -324,6 +328,9 @@ void loop() {
   syncValves();
   syncBus();
   checkPumpRelay();
+  
+  //TODO - move it - ensure, that workflow is used for both setup and loop
+  workflow.sync();
 }
 
 #else //DEBUG_MODE
