@@ -5,8 +5,8 @@
 // Tunable settings (to be tuned and changes for each board)
 
 // Temperature settings
-#define HEATING_PUMP_ON 35          //Temperature when heating pump starts
-#define HEATING_PUMP_OFF 30         //Temperature when heating pump stops (to prevent heating loss)
+#define HEATING_PUMP_ON 30          //Temperature when heating pump starts
+#define HEATING_PUMP_OFF 25         //Temperature when heating pump stops (to prevent heating loss)
 
 #define HEATING_PUMP_CHECK_TEMP 55  //Temperature when need to restart pump in case of no flow
 #define HEATING_PUMP_IDLE_TEMP  50  //Temperature when pump can be checked for being idle (higher temperatures doe not allow to switch pump off)
@@ -18,11 +18,11 @@
 #define HEATER_1_ON  0 //Temperature to turn on the first heater
 #define HEATER_1_OFF 5 //Temperature to turn off the first heater
 
-#define HEATER_2_ON  38  //Temperature to turn on the second heater
-#define HEATER_2_OFF 42  //Temperature to turn off the first heater
+#define HEATER_2_ON  28  //Temperature to turn on the second heater
+#define HEATER_2_OFF 32  //Temperature to turn off the first heater
 
-#define HEATER_3_ON  40  //Temperature to turn on the third heater 
-#define HEATER_3_OFF 45  //Temperature to turn off the first heater
+#define HEATER_3_ON  30  //Temperature to turn on the third heater 
+#define HEATER_3_OFF 35  //Temperature to turn off the first heater
 
 #define BOILER_COOLER_ON 85    //Boiler temperature to start cooler to prevent overheating
 #define BOILER_COOLER_OFF 75   //Boiler temperature to stop cooler 
