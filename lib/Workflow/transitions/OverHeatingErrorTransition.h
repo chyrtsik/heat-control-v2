@@ -1,0 +1,25 @@
+#ifndef __OVER_HEATING_ERROR_TRANSITION__INCLUDED__
+#define __OVER_HEATING_ERROR_TRANSITION__INCLUDED__
+
+#include "../WorkflowTransition.h"
+#include <TemperatureSensor.h>
+#include <FlowSensor.h>
+
+typedef float (*HeatingPowerSupplier)();
+
+class OverHeatingErrorTransition : public WorkflowTransition
+{
+  public:
+    TemperatureSensor *boiler;
+
+    OverHeatingErrorTransition(TemperatureSensor *boiler){
+      this->boiler = boiler;
+    }
+
+  public:
+    bool canHappen(){
+      return boiler->getTemperature() > 80; //TODO - make configurable. This is an overheating alartm trigger
+    }
+};
+
+#endif //__OVER_HEATING_ERROR_TRANSITION__INCLUDED__

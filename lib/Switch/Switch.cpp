@@ -22,3 +22,7 @@ void Switch::turnOn(){
 void Switch::turnOff(){
   bus->setBit(bitNo, false);
 }
+
+unsigned long Switch::getTimeInLastState(){
+  return millis() - lastStateChange;
+}

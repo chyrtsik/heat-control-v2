@@ -204,21 +204,6 @@ int valvesCount = sizeof(valves) / sizeof(valves[0]);
 ///////////////////////////////////////////////////////////////////////////////////////////
 // Controller setup and main loop
 
-unsigned long lastPumpCheckTime = 0;
-void checkPumpRelay(){
-  if (lastPumpCheckTime == 0 || millis() - lastPumpCheckTime > PUMP_CHECK_DELAY){
-    if (pumpRelay.isOn() && flowSensor.getTicks() > 0 && flowSensor.getLitresPerMinute() < 0.01){
-      //Pump is supposed to be on, but there is no flow, pump relay might be reset. Need to switch it on again.
-      ledAlarm.turnOn();
-      pumpRelay.turnOff();
-      delay(500);
-      pumpRelay.turnOn();
-      ledAlarm.turnOff();
-    }
-    lastPumpCheckTime = millis();
-  }
-}
-
 unsigned long lastBusSyncTime = 0;
 void syncBus(){
   if (lastBusSyncTime == 0 || millis() - lastBusSyncTime > BUS_SYNC_DELAY){
@@ -319,7 +304,14 @@ void setup() {
 
 #ifndef DEBUG_MODE
 
-Workflow workflow;
+Workflow workflow(
+  &outsideTemp, &boilerTemp, 
+  &flowSensor, 
+  &pumpRelay, &coolerRelay, &ledAlarm, 
+  &heaterRelay1, &heaterRelay2, &heaterRelay3, 
+  &flueValve, &boilerValve, 
+  calculateCurrentPower
+);
 
 void loop() {
   syncTermoRelays();  
@@ -327,7 +319,6 @@ void loop() {
   processServer();  
   syncValves();
   syncBus();
-  checkPumpRelay();
   
   //TODO - move it - ensure, that workflow is used for both setup and loop
   workflow.sync();

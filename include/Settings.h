@@ -30,7 +30,6 @@
 // Timings
 #define BUS_SYNC_DELAY     1000       //Delay between resyncing state of the parallel bus
 #define TERMO_SYNC_DELAY   10000      //Delay between temperaature sensor readings
-#define PUMP_CHECK_DELAY   10000      //Delay between checks if pump relay is in a correct state
 
 //Valves configuration (controlled by servos)
 #define FLUE_VALVE_PIN                    5        //B6
