@@ -4,6 +4,8 @@
 class WorkflowState
 {
   public:
+    virtual const char* getName();
+    
     virtual bool canEnter();
     virtual void onEnter();
     

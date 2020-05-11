@@ -6,43 +6,70 @@
 #include <EspDebug.h>
 
 #include "WorkflowState.h"
-#include "states/PendingState.h"
+#include "WorkflowTransition.h"
+
+#include "states/IdleState.h"
 #include "states/HeatingState.h"
-#include "states/ErrorState.h"
+#include "states/OverheatErrorState.h"
+
+#include "transitions/TurnOnHeatingTransition.h"
+#include "transitions/TurnOffHeatingTransition.h"
+#include "transitions/OverHeatingErrorTransition.h"
 
 class Workflow {
   private:
-    std::map<WorkflowState*, std::list<WorkflowState*>*> states;
+    std::map<WorkflowState*, std::map<WorkflowTransition*, WorkflowState*>*> nodes;
     WorkflowState *currentState; 
     
-    PendingState pendingState;
+    PumpChecker pumpChecker;
+
+    IdleState idleState;
     HeatingState heatingState;
-    ErrorState errorState;
+    OverheatErrorState overheatErrorState;
+
+    TurnOnHeatingTransition turnOnHeatingTransition;
+    TurnOffHeatingTransition turnOffHeatingTransition;
+    OverHeatingErrorTransition overHeatingErrorTransition;
 
   public:
-    Workflow(){
-       //TODO - initialize workflow to initial state
-       currentState = &pendingState;
-       initTransition(&pendingState, &heatingState, &errorState);
-       initTransition(&heatingState, &errorState, &pendingState);
-       initTransition(&errorState, &pendingState, &heatingState);
+    Workflow(
+      TemperatureSensor *outside, TemperatureSensor *boiler, 
+      FlowSensor *flow, 
+      Switch *pump, Switch *cooler, Switch *alarm,
+      Switch *heater1, Switch *heater2, Switch *heater3,
+      ServoController *flueServo, ServoController *boilerServo, 
+      HeatingPowerSupplier heatingPower
+    ) 
+    : turnOnHeatingTransition(outside, flow, pump)
+    , turnOffHeatingTransition(outside, heatingPower)
+    , pumpChecker(pump, flow)
+    , overHeatingErrorTransition(boiler)
+    , overheatErrorState(&overHeatingErrorTransition, alarm, pump, cooler, heater1, heater2, heater3, flueServo, boilerServo, &pumpChecker) 
+     {
+        //TODO - initialize workflow to initial state
+        currentState = &idleState;
+        initTransition(&idleState, &heatingState, &turnOnHeatingTransition);
+        initTransition(&heatingState, &idleState, &turnOffHeatingTransition);
+        initTransition(&heatingState, &overheatErrorState, &overHeatingErrorTransition);
+        initTransition(&overheatErrorState, &heatingState, &turnOnHeatingTransition);
+        initTransition(&overheatErrorState, &idleState, &turnOffHeatingTransition);
     }
 
     ~Workflow(){
-      std::map<WorkflowState*, std::list<WorkflowState*>*>::iterator it;
-      for (it = states.begin(); it != states.end(); it++){
+      std::map<WorkflowState*, std::map<WorkflowTransition*, WorkflowState*>*>::iterator it;
+      for (it = nodes.begin(); it != nodes.end(); it++){
         delete it->second;
       }
     }
 
     void sync(){
-      this->currentState->sync();
       if (this->currentState->canExit()){
-        std::list<WorkflowState*> *nextStates = states.at(currentState);
-        for (std::list<WorkflowState*>::iterator nextState = nextStates->begin(); nextState != nextStates->end(); nextState++){
-          if ((*nextState)->canEnter()){
+        std::map<WorkflowTransition*, WorkflowState*> *outgoing = nodes[currentState];
+        std::map<WorkflowTransition*, WorkflowState*>::iterator it;
+        for (it = outgoing->begin(); it != outgoing->end(); it++){
+          if (it->first->canHappen()){
             currentState->onExit();
-            currentState = (*nextState);
+            currentState = it->second;
             currentState->onEnter();
             break;
           }
@@ -51,11 +78,12 @@ class Workflow {
     }
 
   private:
-    void initTransition(WorkflowState *from, WorkflowState *to1, WorkflowState *to2){
-      std::list<WorkflowState*> *next = new std::list<WorkflowState*>();
-      next->push_back(to1);
-      next->push_back(to2);
-      states.insert(std::make_pair(from, next));
+    void initTransition(WorkflowState *from, WorkflowState *to, WorkflowTransition *transition){
+      std::map<WorkflowTransition*, WorkflowState*> *outgoing = nodes[from];
+      if (outgoing == NULL){
+        outgoing = new std::map<WorkflowTransition*, WorkflowState*>();
+      }
+      (*outgoing)[transition] = to;
     }
 };
 

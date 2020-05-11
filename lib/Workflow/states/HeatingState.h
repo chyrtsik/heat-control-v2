@@ -6,13 +6,30 @@
 class HeatingState : public WorkflowState
 {
   public:
-    bool canEnter();
-    void onEnter();
+    const char* getName(){
+      return "Heating";
+    }
+
+    bool canEnter(){
+      return true;
+    }
+    void onEnter(){
+      //TODO: Enable heating (pump, heater relay, servos when needed)
+    }
     
-    void sync();
+    void sync(){
+      //TODO - sync termo relays (and adjust working temperature depending on weather and heating power)
+      //TODO - check servos (anti-stall)
+      //TODO - check pump health
+    }
     
-    bool canExit();
-    void onExit();
+    bool canExit(){
+      //TODO - return false, in case there is an ongoing process (see above)
+      return true;
+    }
+    void onExit(){
+      //TODO - turn on 
+    }
 };
 
 #endif //__PENDING_STATE__INCLUDED__
