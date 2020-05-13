@@ -15,6 +15,7 @@
 #include "transitions/TurnOnHeatingTransition.h"
 #include "transitions/TurnOffHeatingTransition.h"
 #include "transitions/OverHeatingErrorTransition.h"
+#include "transitions/TemperatureSensorErrorTransition.h"
 
 class Workflow {
   private:
@@ -30,10 +31,11 @@ class Workflow {
     TurnOnHeatingTransition turnOnHeatingTransition;
     TurnOffHeatingTransition turnOffHeatingTransition;
     OverHeatingErrorTransition overHeatingErrorTransition;
+    TemperatureSensorErrorTransition temperatureSensorErrorTransition;
 
   public:
     Workflow(
-      TemperatureSensor *outside, TemperatureSensor *boiler, 
+      TemperatureSensor *outside, TemperatureSensor *boiler, TemperatureSensor *flue, 
       FlowSensor *flow, 
       Switch *pump, Switch *cooler, Switch *alarm,
       Switch *heater1, Switch *heater2, Switch *heater3,
@@ -44,13 +46,16 @@ class Workflow {
     , turnOffHeatingTransition(outside, heatingPower)
     , pumpChecker(pump, flow)
     , overHeatingErrorTransition(boiler)
-    , overheatErrorState(&overHeatingErrorTransition, alarm, pump, cooler, heater1, heater2, heater3, flueServo, boilerServo, &pumpChecker) 
+    , temperatureSensorErrorTransition(boiler)
+    , overheatErrorState(&overHeatingErrorTransition, alarm, pump, cooler, heater1, heater2, heater3, flueServo, boilerServo, &pumpChecker)
+    , heatingState(boiler, outside, flue, pump, cooler, heater1, heater2, heater3, flueServo, boilerServo, &pumpChecker)
      {
         //TODO - initialize workflow to initial state
         currentState = &idleState;
         initTransition(&idleState, &heatingState, &turnOnHeatingTransition);
         initTransition(&heatingState, &idleState, &turnOffHeatingTransition);
         initTransition(&heatingState, &overheatErrorState, &overHeatingErrorTransition);
+        initTransition(&heatingState, &overheatErrorState, &temperatureSensorErrorTransition);
         initTransition(&overheatErrorState, &heatingState, &turnOnHeatingTransition);
         initTransition(&overheatErrorState, &idleState, &turnOffHeatingTransition);
     }
@@ -63,6 +68,7 @@ class Workflow {
     }
 
     void sync(){
+      this->currentState->sync();
       if (this->currentState->canExit()){
         std::map<WorkflowTransition*, WorkflowState*> *outgoing = nodes[currentState];
         std::map<WorkflowTransition*, WorkflowState*>::iterator it;

@@ -111,17 +111,6 @@ Switch heaterRelay2(busA, 4, "heater2");
 Switch heaterRelay3(busA, 5, "heater3");
 Switch coolerRelay(busA, 2, "cooler");
 
-TermoRelay pump(HEATING_PUMP_ON, HEATING_PUMP_OFF, &pumpRelay, &ledAlarm, true);
-TermoRelay pumpNoFreeze(ANTIFREEZE_PUMP_ON, ANTIFREEZE_PUMP_OFF, &pumpRelay, &ledAlarm, true);
-TermoRelay heater1(HEATER_1_ON, HEATER_1_OFF, &heaterRelay1, &ledAlarm); 
-TermoRelay heater2(HEATER_2_ON, HEATER_2_OFF, &heaterRelay2, &ledAlarm); 
-TermoRelay heater3(HEATER_3_ON, HEATER_3_OFF, &heaterRelay3, &ledAlarm); 
-
-TermoRelay* termoRelays[] = {&pumpNoFreeze, &pump, &heater1, &heater2, &heater3}; 
-int termoRelaysCount = sizeof(termoRelays) / sizeof(termoRelays[0]);
-
-TermoRelay* boilerDependentTermoRelays[] = {&pumpNoFreeze, &pump, &heater1, &heater2, &heater3}; 
-int boilerDependentTermoRelaysCount = sizeof(boilerDependentTermoRelays) / sizeof(boilerDependentTermoRelays[0]);
 
 Switch* switches[] = {
   &pumpRelay, &pump2Relay, 
@@ -131,18 +120,6 @@ Switch* switches[] = {
   &ledWiFi, &ledConsul, &ledTemp, &ledBusy, &ledAlarm
 };
 int switchesCount = sizeof(switches) / sizeof(switches[0]);
-
-
-bool calculateCoolerCondition(bool isOn){
-  float boilerTemperature = boilerTemp.getTemperature();
-  bool onForBoiler = boilerTemperature >= BOILER_COOLER_ON || (isOn && boilerTemperature > BOILER_COOLER_OFF);
-  
-  float flueTemperature = flueTemp.getTemperature();
-  bool onForFlue = flueTemperature >= FLUE_COOLER_ON || (isOn && flueTemperature > FLUE_COOLER_OFF); 
-
-  return onForBoiler || onForFlue; 
-}
-ConditionalRelay cooler(&coolerRelay, calculateCoolerCondition); 
 
 //////////////////////////////////////////////////////////////////////////
 // Servos
@@ -215,29 +192,6 @@ void syncBus(){
   }
 }
 
-unsigned long lastSyncTime = 0;
-void syncTermoRelays(){
-  if (lastSyncTime == 0 || millis() - lastSyncTime > TERMO_SYNC_DELAY){
-    
-    //Relays, dependent on builer temperature.
-    float currentBoilerTemp = boilerTemp.getTemperature();
-    for (int i=0; i<boilerDependentTermoRelaysCount; i++){
-      boilerDependentTermoRelays[i]->processTemp(currentBoilerTemp);
-    }
-
-    //Conditional relays.
-    cooler.sync();
-    
-    lastSyncTime = millis();
-  }
-}
-
-void syncValves(){
-  for (int i=0; i<valvesCount; i++){
-    valves[i]->sync();
-  }
-}
-
 void setupBus(){
   //Init pins for communication with Parallel bus.
   pinMode(PIN_SET, OUTPUT);
@@ -305,7 +259,7 @@ void setup() {
 #ifndef DEBUG_MODE
 
 Workflow workflow(
-  &outsideTemp, &boilerTemp, 
+  &outsideTemp, &boilerTemp, &flueTemp,
   &flowSensor, 
   &pumpRelay, &coolerRelay, &ledAlarm, 
   &heaterRelay1, &heaterRelay2, &heaterRelay3, 
@@ -314,14 +268,10 @@ Workflow workflow(
 );
 
 void loop() {
-  syncTermoRelays();  
-  flowSensor.syncSpeed(); 
-  processServer();  
-  syncValves();
   syncBus();
-  
-  //TODO - move it - ensure, that workflow is used for both setup and loop
+  flowSensor.syncSpeed();
   workflow.sync();
+  processServer();  
 }
 
 #else //DEBUG_MODE

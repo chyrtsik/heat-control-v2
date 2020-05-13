@@ -211,15 +211,8 @@ void handleApiGetConfig() {
   
   StaticJsonDocument<BUFFER_SIZE> root;
   
-  JsonArray relays = root.createNestedArray("termoRelays");
-  for (int i = 0; i < termoRelaysCount; i++) {
-    JsonObject relayConfig = relays.createNestedObject();
-    TermoRelay *relay = termoRelays[i];
-    relayConfig["name"] = (char*)relay->getName();
-    relayConfig["onTemp"] = relay->getOnTemp();
-    relayConfig["offTemp"] = relay->getOffTemp();
-  }
-  
+  //TODO - implement load and return of config
+
   sendJsonResponse(root);
   notBusy();
 }
