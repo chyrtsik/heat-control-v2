@@ -5,8 +5,6 @@
 #include <TemperatureSensor.h>
 #include <FlowSensor.h>
 
-typedef float (*HeatingPowerSupplier)();
-
 class OverHeatingErrorTransition : public WorkflowTransition
 {
   public:
@@ -18,7 +16,7 @@ class OverHeatingErrorTransition : public WorkflowTransition
 
   public:
     bool canHappen(){
-      return boiler->getTemperature() > 80; //TODO - make configurable. This is an overheating alartm trigger
+      return boiler->getTemperature() > 85; //TODO - make configurable. This is an overheating alartm trigger
     }
 };
 
