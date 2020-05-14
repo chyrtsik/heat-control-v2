@@ -10,8 +10,10 @@
 class OverheatErrorState : public WorkflowState
 {
   private:
-    WorkflowTransition *errorTrigger; //Transition which caused this state. It defines if error state can be existed
-    
+    //TODO - make this an array
+    WorkflowTransition *errorTrigger1; //Transition which caused this state. It defines if error state can be existed
+    WorkflowTransition *errorTrigger2; //Transition which caused this state. It defines if error state can be existed
+
     Switch *alarm, *pump, *cooler;
     Switch *heater1, *heater2, *heater3;
     ServoController *flueServo, *boilerServo;
@@ -22,13 +24,14 @@ class OverheatErrorState : public WorkflowState
 
   public:
     OverheatErrorState(
-      WorkflowTransition *errorTrigger, 
+      WorkflowTransition *errorTrigger1, WorkflowTransition *errorTrigger2, 
       Switch *alarm, Switch *pump, Switch *cooler, 
       Switch *heater1, Switch *heater2, Switch *heater3, 
       ServoController *flueServo, ServoController *boilerServo, 
       PumpChecker *pumpChecker
     ){
-      this->errorTrigger = errorTrigger;
+      this->errorTrigger1 = errorTrigger1;
+      this->errorTrigger2 = errorTrigger2;
       this->alarm = alarm;
       this->pump = pump;
       this->cooler = cooler;
@@ -73,7 +76,7 @@ class OverheatErrorState : public WorkflowState
     }
     
     bool canExit(){
-      return !(errorTrigger->canHappen() || pumpChecker->isBusy());
+      return !(errorTrigger1->canHappen() || errorTrigger2->canHappen() || pumpChecker->isBusy());
     }
 
     void onExit(){

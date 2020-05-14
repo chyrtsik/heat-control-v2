@@ -109,6 +109,9 @@ void handleApiGetStatus() {
     valvesJson[valves[i]->getName()] = valves[i]->getValue();
   }
 
+  JsonObject workflowJson = root.createNestedObject("workflow");
+  workflowJson["state"] = workflow.getCurrentState()->getName();
+
   sendJsonResponse(root);
   notBusy();
 }

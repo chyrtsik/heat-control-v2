@@ -178,6 +178,15 @@ ServoController boilerValve("boilerValve", BOILER_VALVE_PIN, BOILER_VALVE_SYNC_I
 ServoController *valves[] = {&flueValve, &boilerValve};
 int valvesCount = sizeof(valves) / sizeof(valves[0]);
 
+Workflow workflow(
+  &outsideTemp, &boilerTemp, &flueTemp,
+  &flowSensor, 
+  &pumpRelay, &coolerRelay, &ledAlarm, 
+  &heaterRelay1, &heaterRelay2, &heaterRelay3, 
+  &flueValve, &boilerValve, 
+  calculateCurrentPower
+);
+
 ///////////////////////////////////////////////////////////////////////////////////////////
 // Controller setup and main loop
 
@@ -205,17 +214,33 @@ void setupBus(){
 // Code responsible for WiFi server funtionality
 
 const int REGISTRATION_REFRESH_INTERVAL = 60000;
-ConsulRegistration registration(SERVICE_NAME, REGISTRATION_REFRESH_INTERVAL, &ledWiFi, &ledConsul);
+ConsulRegistration registration(SERVICE_NAME, REGISTRATION_REFRESH_INTERVAL, &ledConsul);
 
 const int SERVER_PORT = 80;
 ESP8266WebServer server(SERVER_PORT);
 
 void processServer() {
   server.handleClient();
-  registration.refresh();
+  if (ledWiFi.isOn()){
+    registration.refresh();
+  }
 }
 
+void onGotIP(const WiFiEventStationModeGotIP& event){
+  DEBUG_PRINT_LN("Connected and got IP.");
+	ledWiFi.turnOn();     
+}
+
+void onDisconnect(const WiFiEventStationModeDisconnected& event){
+	ledWiFi.turnOff();
+}
+
+WiFiEventHandler onConnectHandler, onDisconnectHandler, onIPHandler;
+
 void connectToWiFi() {
+  onDisconnectHandler = WiFi.onStationModeDisconnected(onDisconnect);
+  onIPHandler = WiFi.onStationModeGotIP(onGotIP);
+  WiFi.persistent(false);
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
   DEBUG_PRINTF("Connecting to WiFi: %s\n", ssid);
@@ -257,15 +282,6 @@ void setup() {
 }
 
 #ifndef DEBUG_MODE
-
-Workflow workflow(
-  &outsideTemp, &boilerTemp, &flueTemp,
-  &flowSensor, 
-  &pumpRelay, &coolerRelay, &ledAlarm, 
-  &heaterRelay1, &heaterRelay2, &heaterRelay3, 
-  &flueValve, &boilerValve, 
-  calculateCurrentPower
-);
 
 void loop() {
   syncBus();

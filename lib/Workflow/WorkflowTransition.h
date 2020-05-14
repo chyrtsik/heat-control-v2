@@ -4,6 +4,7 @@
 class WorkflowTransition
 {
   public:
+    virtual const char* getName();
     virtual bool canHappen();
 };
 

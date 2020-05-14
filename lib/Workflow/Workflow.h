@@ -47,10 +47,9 @@ class Workflow {
     , pumpChecker(pump, flow)
     , overHeatingErrorTransition(boiler)
     , temperatureSensorErrorTransition(boiler)
-    , overheatErrorState(&overHeatingErrorTransition, alarm, pump, cooler, heater1, heater2, heater3, flueServo, boilerServo, &pumpChecker)
+    , overheatErrorState(&overHeatingErrorTransition, &temperatureSensorErrorTransition, alarm, pump, cooler, heater1, heater2, heater3, flueServo, boilerServo, &pumpChecker)
     , heatingState(boiler, outside, flue, pump, cooler, heater1, heater2, heater3, flueServo, boilerServo, &pumpChecker)
      {
-        //TODO - initialize workflow to initial state
         currentState = &idleState;
         initTransition(&idleState, &heatingState, &turnOnHeatingTransition);
         initTransition(&heatingState, &idleState, &turnOffHeatingTransition);
@@ -58,6 +57,8 @@ class Workflow {
         initTransition(&heatingState, &overheatErrorState, &temperatureSensorErrorTransition);
         initTransition(&overheatErrorState, &heatingState, &turnOnHeatingTransition);
         initTransition(&overheatErrorState, &idleState, &turnOffHeatingTransition);
+
+        DEBUG_PRINTF("Workflow: initialized with %s state\n", currentState->getName());
     }
 
     ~Workflow(){
@@ -67,19 +68,36 @@ class Workflow {
       }
     }
 
+    WorkflowState *getCurrentState(){
+      return currentState;
+    }
+
+    
     void sync(){
-      this->currentState->sync();
-      if (this->currentState->canExit()){
-        std::map<WorkflowTransition*, WorkflowState*> *outgoing = nodes[currentState];
-        std::map<WorkflowTransition*, WorkflowState*>::iterator it;
-        for (it = outgoing->begin(); it != outgoing->end(); it++){
-          if (it->first->canHappen()){
-            currentState->onExit();
-            currentState = it->second;
-            currentState->onEnter();
-            break;
+      static unsigned long lastSync = 0;
+      if (lastSync == 0 || millis() - lastSync > 3000){
+        this->currentState->sync();
+        if (this->currentState->canExit()){
+          DEBUG_PRINT_LN("Workflow: Checking outgoing transitions");
+          std::map<WorkflowTransition*, WorkflowState*> *outgoing = nodes[currentState];
+          DEBUG_PRINTF("Workflow: Have %d transitions to check\n", outgoing->size());
+          std::map<WorkflowTransition*, WorkflowState*>::iterator it;
+          for (it = outgoing->begin(); it != outgoing->end(); it++){
+            DEBUG_PRINTF("Workflow: Checking transition %s\n", it->first->getName());
+            if (it->first->canHappen()){
+              DEBUG_PRINTF("Workflow: about to change state from %s to %s\n", currentState->getName(), it->second->getName());
+              currentState->onExit();
+              currentState = it->second;
+              currentState->onEnter();
+              DEBUG_PRINTF("Workflow: finished transition to %s state\n", currentState->getName());
+              break;
+            }
           }
         }
+        else{
+          DEBUG_PRINT_LN("Cannot exit current state");
+        }
+        lastSync = millis();
       }
     }
 
@@ -88,6 +106,7 @@ class Workflow {
       std::map<WorkflowTransition*, WorkflowState*> *outgoing = nodes[from];
       if (outgoing == NULL){
         outgoing = new std::map<WorkflowTransition*, WorkflowState*>();
+        nodes[from] = outgoing;
       }
       (*outgoing)[transition] = to;
     }

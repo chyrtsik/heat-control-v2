@@ -15,6 +15,10 @@ class TemperatureSensorErrorTransition  : public WorkflowTransition
     }
 
   public:
+    const char* getName(){
+      return "TemperatureSensorErrorTransition";
+    }
+
     bool canHappen(){
       return boiler->getTemperature() < 0; //Either sensor is not working (it returns -127 in case of error) or boiler is about to freese.
     }

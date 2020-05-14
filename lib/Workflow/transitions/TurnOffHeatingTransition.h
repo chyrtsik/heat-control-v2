@@ -32,6 +32,10 @@ class TurnOffHeatingTransition : public WorkflowTransition
     }
 
   public:
+    const char* getName(){
+      return "TurnOffHeatingTransition";
+    }
+
     bool canHappen(){
       return isTooHot() || (isWarmEnough() ? isTooLittleHeatingPower() : false);
     }

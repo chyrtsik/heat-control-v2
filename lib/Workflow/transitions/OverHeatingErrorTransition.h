@@ -15,6 +15,10 @@ class OverHeatingErrorTransition : public WorkflowTransition
     }
 
   public:
+    const char* getName(){
+      return "OverHeatingErrorTransition";
+    }
+
     bool canHappen(){
       return boiler->getTemperature() > 85; //TODO - make configurable. This is an overheating alartm trigger
     }
