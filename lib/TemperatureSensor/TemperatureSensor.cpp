@@ -9,15 +9,19 @@ TemperatureSensor::TemperatureSensor(DallasTemperature &sensors, DeviceAddress &
 }
 
 float TemperatureSensor::getTemperature(){
-  ledTemp->turnOn();
-  ensureStarted();
-  float temp = measureTemp(); 
-  if (temp == ERROR_TEMP_VALUE){
-    resetSensors(); //Reset once in case sensors hang. But only once to ensure, that the value is not the actual measurement.
-    temp = measureTemp();
+  if (lastMeasurement == 0 || millis() - lastMeasurement > TERMO_SYNC_DELAY){
+    ledTemp->turnOn();
+    ensureStarted();
+    float temp = measureTemp(); 
+    if (temp == ERROR_TEMP_VALUE){
+      resetSensors(); //Reset once in case sensors hang. But only once to ensure, that the value is not the actual measurement.
+      temp = measureTemp();
+    }
+    ledTemp->turnOff();
+    lastTempValue = round(temp * 10.0) / 10.0; //resolution is 1 degree after zero
+    lastMeasurement = millis();
   }
-  ledTemp->turnOff();
-  return round(temp * 10.0) / 10.0; //resolution is 1 degree after zero
+  return lastTempValue;
 }
 
 const char* TemperatureSensor::getName(){

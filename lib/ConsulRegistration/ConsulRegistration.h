@@ -21,7 +21,7 @@ class ConsulRegistration{
 
 
   public:
-    ConsulRegistration(const char *serviceName, int refreshInterval, Switch *ledWifi, Switch *ledConsul);
+    ConsulRegistration(const char *serviceName, int refreshInterval, Switch *ledConsul);
     void refresh();
 
   private:

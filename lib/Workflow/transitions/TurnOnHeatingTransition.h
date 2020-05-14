@@ -46,7 +46,7 @@ class TurnOnHeatingTransition : public WorkflowTransition
         }    
       }
       else {
-        if (currentTime - lastMeasurement > TIME_BETWEEN_MEASUREMENTS){
+        if (lastMeasurement == 0 || currentTime - lastMeasurement > TIME_BETWEEN_MEASUREMENTS){
           if (!pump->isOn()){
             //Start measurements
             isMeasuring = true;
@@ -60,10 +60,14 @@ class TurnOnHeatingTransition : public WorkflowTransition
         }
       }
       
-      return measuredFlow > 10.0; //TODO - make this configurable
+      return measuredFlow > 9.5; //TODO - make this configurable
     }
 
   public:
+    const char* getName(){
+      return "TurnOnHeatingTransition";
+    }
+
     bool canHappen(){
       return isTooCold() || (isColdENoughToTryFlow() ? hasEnoughWaterFlow() : false);
     }
