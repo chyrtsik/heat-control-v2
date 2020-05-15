@@ -92,6 +92,13 @@ class HeatingState : public WorkflowState
       return "Heating";
     }
 
+    void printStatus(JsonObject &stateJsonNode){
+      float outsideTemperature = outside->getTemperature();
+      float workingTemperature = calculateWorkingTemperature(outsideTemperature);
+      stateJsonNode["workingTemperature"] = workingTemperature;
+      stateJsonNode["engagedHeaters"] = isNeedSecondHeater(boiler->getTemperature(), workingTemperature, outsideTemperature) ? 2 : 1;
+    }
+
     bool canEnter(){
       return true;
     }

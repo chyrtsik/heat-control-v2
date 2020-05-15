@@ -110,7 +110,7 @@ void handleApiGetStatus() {
   }
 
   JsonObject workflowJson = root.createNestedObject("workflow");
-  workflowJson["state"] = workflow.getCurrentState()->getName();
+  workflow.printStatus(workflowJson);
 
   sendJsonResponse(root);
   notBusy();

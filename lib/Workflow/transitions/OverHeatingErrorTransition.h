@@ -16,7 +16,7 @@ class OverHeatingErrorTransition : public WorkflowTransition
 
   public:
     const char* getName(){
-      return "OverHeatingErrorTransition";
+      return "BoilerOverheating";
     }
 
     bool canHappen(){
