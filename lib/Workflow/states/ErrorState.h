@@ -82,10 +82,10 @@ class ErrorState : public WorkflowState
       heater3->turnOff();
 
       originalFlueServoValue = flueServo->getValue();
-      flueServo->setValue(80);     //TODO - make configurable. This is a copy-paste of servo value calculation based on temperature
+      flueServo->setValue(FLUE_VALSE_CLOSED_VALUE);
       
       originalBoilerServoValue = boilerServo->getValue();
-      boilerServo->setValue(20); //TODO - make configurable. This is a copy-paste of servo value calculation based on temperature
+      boilerServo->setValue(BOILER_VALCE_CLOSED_VALUE);
     }
     
     void sync(){

@@ -3,15 +3,25 @@
 
 #include "../WorkflowState.h"
 
+#include <ServoController.h>
+
 class IdleState : public WorkflowState
-{
+{ 
+  private:  
+    ServoController *flueServo, *boilerServo;
+
   public:
+    IdleState(ServoController *flueServo, ServoController *boilerServo){
+      this->flueServo = flueServo;
+      this->boilerServo = boilerServo;
+    }
+
     const char* getName(){ 
       return "Idle"; 
     }
 
     void printStatus(JsonObject &stateJsonNode){
-      //TODO - implement  
+
     }
 
     bool canEnter(){
@@ -19,6 +29,8 @@ class IdleState : public WorkflowState
     }
 
     void onEnter(){
+      flueServo->setValue(FLUE_VALSE_CLOSED_VALUE);
+      boilerServo->setValue(BOILER_VALCE_CLOSED_VALUE);
     }
     
     void sync(){
