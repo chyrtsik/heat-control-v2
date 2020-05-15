@@ -16,7 +16,7 @@ class TemperatureSensorErrorTransition  : public WorkflowTransition
 
   public:
     const char* getName(){
-      return "TemperatureSensorErrorTransition";
+      return "TemperatureSensorError";
     }
 
     bool canHappen(){

@@ -65,7 +65,7 @@ class TurnOnHeatingTransition : public WorkflowTransition
 
   public:
     const char* getName(){
-      return "TurnOnHeatingTransition";
+      return "TurnOnHeating";
     }
 
     bool canHappen(){

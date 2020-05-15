@@ -33,7 +33,7 @@ class TurnOffHeatingTransition : public WorkflowTransition
 
   public:
     const char* getName(){
-      return "TurnOffHeatingTransition";
+      return "TurnOffHeating";
     }
 
     bool canHappen(){

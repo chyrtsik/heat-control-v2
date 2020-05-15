@@ -2,15 +2,15 @@
 #define __WORKFLOW__INCLUDED__
 
 #include <map>
-#include <list>
 #include <EspDebug.h>
+#include <ArduinoJson.h>
 
 #include "WorkflowState.h"
 #include "WorkflowTransition.h"
 
 #include "states/IdleState.h"
 #include "states/HeatingState.h"
-#include "states/OverheatErrorState.h"
+#include "states/errorState.h"
 
 #include "transitions/TurnOnHeatingTransition.h"
 #include "transitions/TurnOffHeatingTransition.h"
@@ -26,12 +26,13 @@ class Workflow {
 
     IdleState idleState;
     HeatingState heatingState;
-    OverheatErrorState overheatErrorState;
+    ErrorState errorState;
 
-    TurnOnHeatingTransition turnOnHeatingTransition;
-    TurnOffHeatingTransition turnOffHeatingTransition;
     OverHeatingErrorTransition overHeatingErrorTransition;
     TemperatureSensorErrorTransition temperatureSensorErrorTransition;
+    TurnOnHeatingTransition turnOnHeatingTransition;
+    TurnOffHeatingTransition turnOffHeatingTransition;
+    
 
   public:
     Workflow(
@@ -47,16 +48,17 @@ class Workflow {
     , pumpChecker(pump, flow)
     , overHeatingErrorTransition(boiler)
     , temperatureSensorErrorTransition(boiler)
-    , overheatErrorState(&overHeatingErrorTransition, &temperatureSensorErrorTransition, alarm, pump, cooler, heater1, heater2, heater3, flueServo, boilerServo, &pumpChecker)
+    , errorState( {&overHeatingErrorTransition, &temperatureSensorErrorTransition}, alarm, pump, cooler, heater1, heater2, heater3, flueServo, boilerServo, &pumpChecker)
     , heatingState(boiler, outside, flue, pump, cooler, heater1, heater2, heater3, flueServo, boilerServo, &pumpChecker)
      {
         currentState = &idleState;
+        initTransition(&idleState, &errorState, &temperatureSensorErrorTransition);
         initTransition(&idleState, &heatingState, &turnOnHeatingTransition);
         initTransition(&heatingState, &idleState, &turnOffHeatingTransition);
-        initTransition(&heatingState, &overheatErrorState, &overHeatingErrorTransition);
-        initTransition(&heatingState, &overheatErrorState, &temperatureSensorErrorTransition);
-        initTransition(&overheatErrorState, &heatingState, &turnOnHeatingTransition);
-        initTransition(&overheatErrorState, &idleState, &turnOffHeatingTransition);
+        initTransition(&heatingState, &errorState, &overHeatingErrorTransition);
+        initTransition(&heatingState, &errorState, &temperatureSensorErrorTransition);
+        initTransition(&errorState, &heatingState, &turnOnHeatingTransition);
+        initTransition(&errorState, &idleState, &turnOffHeatingTransition);
 
         DEBUG_PRINTF("Workflow: initialized with %s state\n", currentState->getName());
     }
@@ -68,8 +70,10 @@ class Workflow {
       }
     }
 
-    WorkflowState *getCurrentState(){
-      return currentState;
+    void printStatus(JsonObject &workflowJsonNode){
+      JsonObject stateJsonNode = workflowJsonNode.createNestedObject("currentState");
+      stateJsonNode["name"] = currentState->getName();
+      currentState->printStatus(stateJsonNode);
     }
 
     

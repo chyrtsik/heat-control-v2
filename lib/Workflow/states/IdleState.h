@@ -10,6 +10,10 @@ class IdleState : public WorkflowState
       return "Idle"; 
     }
 
+    void printStatus(JsonObject &stateJsonNode){
+      //TODO - implement  
+    }
+
     bool canEnter(){
       return true;
     }

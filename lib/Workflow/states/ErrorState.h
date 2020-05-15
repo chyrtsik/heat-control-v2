@@ -1,19 +1,19 @@
-#ifndef __OVERHEAT_ERROR_STATE__INCLUDED__
-#define __OVERHEAT_ERROR_STATE__INCLUDED__
+#ifndef __ERROR_STATE__INCLUDED__
+#define __ERROR_STATE__INCLUDED__
 
 #include "../WorkflowState.h"
 #include "../common/PumpChecker.h"
 
+#include <list>
 #include <Switch.h>
 #include <ServoController.h>
     
-class OverheatErrorState : public WorkflowState
+class ErrorState : public WorkflowState
 {
   private:
-    //TODO - make this an array
-    WorkflowTransition *errorTrigger1; //Transition which caused this state. It defines if error state can be existed
-    WorkflowTransition *errorTrigger2; //Transition which caused this state. It defines if error state can be existed
-
+    typedef std::list<WorkflowTransition*> TriggersList;
+    TriggersList triggers; //Transitions, which can cause this error
+    
     Switch *alarm, *pump, *cooler;
     Switch *heater1, *heater2, *heater3;
     ServoController *flueServo, *boilerServo;
@@ -22,16 +22,24 @@ class OverheatErrorState : public WorkflowState
     bool originalPumpValue, originalCoolerValue;
     int originalFlueServoValue, originalBoilerServoValue;
 
+    bool hasActiveTriggers(){
+      for (TriggersList::iterator it = triggers.begin(); it != triggers.end(); it++){
+        if ((*it)->canHappen()){
+          return true;
+        }
+      }
+      return false;
+    }
+
   public:
-    OverheatErrorState(
-      WorkflowTransition *errorTrigger1, WorkflowTransition *errorTrigger2, 
+    ErrorState(
+      TriggersList triggers, 
       Switch *alarm, Switch *pump, Switch *cooler, 
       Switch *heater1, Switch *heater2, Switch *heater3, 
       ServoController *flueServo, ServoController *boilerServo, 
       PumpChecker *pumpChecker
     ){
-      this->errorTrigger1 = errorTrigger1;
-      this->errorTrigger2 = errorTrigger2;
+      this->triggers = triggers;
       this->alarm = alarm;
       this->pump = pump;
       this->cooler = cooler;
@@ -45,6 +53,15 @@ class OverheatErrorState : public WorkflowState
 
     const char* getName(){ 
       return "Error"; 
+    }
+
+    void printStatus(JsonObject &stateJsonNode){
+      JsonArray triggersJson = stateJsonNode.createNestedArray("activeErrors");
+      for (TriggersList::iterator it = triggers.begin(); it != triggers.end(); it++){
+        if ((*it)->canHappen()){
+          triggersJson.add((*it)->getName());
+        }
+      }
     }
 
     bool canEnter(){
@@ -76,7 +93,7 @@ class OverheatErrorState : public WorkflowState
     }
     
     bool canExit(){
-      return !(errorTrigger1->canHappen() || errorTrigger2->canHappen() || pumpChecker->isBusy());
+      return !(pumpChecker->isBusy() || hasActiveTriggers());
     }
 
     void onExit(){
@@ -92,4 +109,4 @@ class OverheatErrorState : public WorkflowState
     }
 };
 
-#endif //__OVERHEAT_ERROR_STATE__INCLUDED__
+#endif //__ERROR_STATE__INCLUDED__
