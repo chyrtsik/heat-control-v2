@@ -48,6 +48,7 @@ class Workflow {
     , pumpChecker(pump, flow)
     , overHeatingErrorTransition(boiler)
     , temperatureSensorErrorTransition(boiler)
+    , idleState(flueServo, boilerServo)
     , errorState( {&overHeatingErrorTransition, &temperatureSensorErrorTransition}, alarm, pump, cooler, heater1, heater2, heater3, flueServo, boilerServo, &pumpChecker)
     , heatingState(boiler, outside, flue, pump, cooler, heater1, heater2, heater3, flueServo, boilerServo, &pumpChecker)
      {
@@ -59,8 +60,6 @@ class Workflow {
         initTransition(&heatingState, &errorState, &temperatureSensorErrorTransition);
         initTransition(&errorState, &heatingState, &turnOnHeatingTransition);
         initTransition(&errorState, &idleState, &turnOffHeatingTransition);
-
-        DEBUG_PRINTF("Workflow: initialized with %s state\n", currentState->getName());
     }
 
     ~Workflow(){
@@ -79,6 +78,11 @@ class Workflow {
     
     void sync(){
       static unsigned long lastSync = 0;
+      if (lastSync == 0){
+        currentState->onEnter();
+        DEBUG_PRINTF("Workflow: initialized with %s state\n", currentState->getName());
+      }
+
       if (lastSync == 0 || millis() - lastSync > 3000){
         this->currentState->sync();
         if (this->currentState->canExit()){
