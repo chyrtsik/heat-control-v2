@@ -1,7 +1,7 @@
 #ifndef __TEMPERATURE_SENSOR_ERROR_TRANSITION__INCLUDED__
 #define __TEMPERATURE_SENSOR_ERROR_TRANSITION__INCLUDED__
 
-#include "../WorkflowTransition.h"
+#include "../../WorkflowTransition.h"
 #include <TemperatureSensor.h>
 #include <FlowSensor.h>
 

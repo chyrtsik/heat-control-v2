@@ -22,6 +22,8 @@ class ErrorState : public WorkflowState
     bool originalPumpValue, originalCoolerValue;
     int originalFlueServoValue, originalBoilerServoValue;
 
+    unsigned long lastEnabledErrorMode = 0;
+
     bool hasActiveTriggers(){
       for (TriggersList::iterator it = triggers.begin(); it != triggers.end(); it++){
         if ((*it)->canHappen()){
@@ -29,6 +31,32 @@ class ErrorState : public WorkflowState
         }
       }
       return false;
+    }
+
+    void enableErrorMode(){
+      pump->turnOn();
+      cooler->turnOn();
+      heater1->turnOff();
+      heater2->turnOff();
+      heater3->turnOff();
+      flueServo->setValue(FLUE_VALVE_CLOSED_VALUE);
+      boilerServo->setValue(BOILER_VALVE_CLOSED_VALUE);
+      lastEnabledErrorMode = millis();
+    }
+
+    void reEnableErrorMode(){
+      if (millis() - lastEnabledErrorMode > 60000){
+        //Ensure to have error mode enabled (so that custom override is not doable for long time)
+        enableErrorMode();
+      }
+      else{ 
+        //Just ensure that heating is not enabled
+        pump->turnOn();
+        cooler->turnOn();
+        heater1->turnOff();
+        heater2->turnOff();
+        heater3->turnOff();
+      }
     }
 
   public:
@@ -72,24 +100,16 @@ class ErrorState : public WorkflowState
       alarm->turnOn();
       
       originalPumpValue = pump->isOn();
-      pump->turnOn();
-
       originalCoolerValue = cooler->isOn();
-      cooler->turnOn();
-
-      heater1->turnOff();
-      heater2->turnOff();
-      heater3->turnOff();
-
       originalFlueServoValue = flueServo->getValue();
-      flueServo->setValue(FLUE_VALSE_CLOSED_VALUE);
-      
       originalBoilerServoValue = boilerServo->getValue();
-      boilerServo->setValue(BOILER_VALCE_CLOSED_VALUE);
+
+      enableErrorMode();
     }
     
     void sync(){
       pumpChecker->check();
+      reEnableErrorMode();
     }
     
     bool canExit(){
