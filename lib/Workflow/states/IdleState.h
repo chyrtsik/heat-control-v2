@@ -29,8 +29,8 @@ class IdleState : public WorkflowState
     }
 
     void onEnter(){
-      flueServo->setValue(FLUE_VALSE_CLOSED_VALUE);
-      boilerServo->setValue(BOILER_VALCE_CLOSED_VALUE);
+      flueServo->setValue(FLUE_VALVE_CLOSED_VALUE);
+      boilerServo->setValue(BOILER_VALVE_CLOSED_VALUE);
     }
     
     void sync(){

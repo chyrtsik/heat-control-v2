@@ -53,14 +53,15 @@ class TurnOnHeatingTransition : public WorkflowTransition
             measurementStart = currentTime;
             pump->turnOn();
           }
-          else{
-            //Conflict accessing pump. 
-            //TODO: Log event when events logging will be implemented
+          else if (pump->getTimeInLastState() > TIME_BETWEEN_MEASUREMENTS){
+            //Pump is already running. We can use flow measurements right away.
+            measuredFlow = flow->getLitresPerMinute();
+            lastMeasurement = currentTime;
           }
         }
       }
       
-      return measuredFlow > 9.5; //TODO - make this configurable
+      return measuredFlow > 10.0; //TODO - make this configurable
     }
 
   public:

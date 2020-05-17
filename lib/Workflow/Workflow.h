@@ -14,8 +14,9 @@
 
 #include "transitions/TurnOnHeatingTransition.h"
 #include "transitions/TurnOffHeatingTransition.h"
-#include "transitions/OverHeatingErrorTransition.h"
-#include "transitions/TemperatureSensorErrorTransition.h"
+#include "transitions/errors/OverHeatingErrorTransition.h"
+#include "transitions/errors/TemperatureSensorErrorTransition.h"
+#include "transitions/errors/UnexpectedHeatingErrorTransition.h"
 
 class Workflow {
   private:
@@ -30,9 +31,9 @@ class Workflow {
 
     OverHeatingErrorTransition overHeatingErrorTransition;
     TemperatureSensorErrorTransition temperatureSensorErrorTransition;
+    UnexpectedHeatingErrorTransition unexpectedHeatingErrorTransition;
     TurnOnHeatingTransition turnOnHeatingTransition;
     TurnOffHeatingTransition turnOffHeatingTransition;
-    
 
   public:
     Workflow(
@@ -48,16 +49,21 @@ class Workflow {
     , pumpChecker(pump, flow)
     , overHeatingErrorTransition(boiler)
     , temperatureSensorErrorTransition(boiler)
+    , unexpectedHeatingErrorTransition(boiler, flue, &turnOnHeatingTransition)
     , idleState(flueServo, boilerServo)
-    , errorState( {&overHeatingErrorTransition, &temperatureSensorErrorTransition}, alarm, pump, cooler, heater1, heater2, heater3, flueServo, boilerServo, &pumpChecker)
+    , errorState( {&overHeatingErrorTransition, &temperatureSensorErrorTransition,&unexpectedHeatingErrorTransition}, alarm, pump, cooler, heater1, heater2, heater3, flueServo, boilerServo, &pumpChecker)
     , heatingState(boiler, outside, flue, pump, cooler, heater1, heater2, heater3, flueServo, boilerServo, &pumpChecker)
      {
         currentState = &idleState;
+        
         initTransition(&idleState, &errorState, &temperatureSensorErrorTransition);
+        initTransition(&idleState, &errorState, &unexpectedHeatingErrorTransition);
         initTransition(&idleState, &heatingState, &turnOnHeatingTransition);
+        
         initTransition(&heatingState, &idleState, &turnOffHeatingTransition);
         initTransition(&heatingState, &errorState, &overHeatingErrorTransition);
         initTransition(&heatingState, &errorState, &temperatureSensorErrorTransition);
+        
         initTransition(&errorState, &heatingState, &turnOnHeatingTransition);
         initTransition(&errorState, &idleState, &turnOffHeatingTransition);
     }
