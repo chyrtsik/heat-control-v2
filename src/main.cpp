@@ -136,45 +136,8 @@ float calculateCurrentPower(){
   return 4.2 * (feedTemp.getTemperature() - returnTemp.getTemperature()) * flowSensor.getLitresPerMinute() / 60.0;
 }
 
-int calculateFlueValveValue(){
-  float temperature = max(flueTemp.getTemperature(), boilerTemp.getTemperature());
-  if (temperature < -100){
-    return 40; //Default mode - temperature sensor is not working
-  }
-  else if (temperature <= 20){
-    return 0;  
-  }
-  else if (temperature >= 100){
-    return 80;  
-  }
-  else{
-    return 80 - 80 * (1 - (temperature - 20) / (100.0 - 20.0)); //Linear scale between 20 and 100 celsius (20 = 100%, 100 = 0%)  
-  } 
-}
-
-int calculateBoilerValveValue(){
-  //Decide boiler temperature from the outside temperature
-  const int minTemperatureValue = 20; //Servo position with min temperature
-  const int maxTemperatureValue = 100; //Servo position with max temperature
-  const int maxOutsideTemperature = 10;
-  const int minOutsideTemperature = -20;
-  float temperature = outsideTemp.getTemperature();
-  if (temperature < -100){
-    return minTemperatureValue; //Default mode - temperature sensor is not working, so, do not overheat
-  }
-  else if (temperature >= maxOutsideTemperature){
-    return minTemperatureValue;  //Edge case - the warmest weather supported
-  }
-  else if (temperature <= minOutsideTemperature){
-    return maxTemperatureValue;         //Edge case - the coldest weather supported
-  }
-  else{
-    return minTemperatureValue + (maxTemperatureValue - minTemperatureValue) * (maxOutsideTemperature - temperature) / (maxOutsideTemperature - minOutsideTemperature); //linear scale between min and max values
-  }
-}
-
-ServoController flueValve("flueValve", FLUE_VALVE_PIN, FLUE_VALVE_SYNC_INTERVAL, FLUE_VALVE_ANTI_STALL_INTERVAL, FLUE_VALVE_ACTIVE_TIME, calculateFlueValveValue);
-ServoController boilerValve("boilerValve", BOILER_VALVE_PIN, BOILER_VALVE_SYNC_INTERVAL, BOILER_VALVE_ANTI_STALL_INTERVAL, BOILER_VALVE_ACTIVE_TIME, calculateBoilerValveValue);
+ServoController flueValve("flueValve", FLUE_VALVE_PIN, FLUE_VALVE_SYNC_INTERVAL, FLUE_VALVE_ANTI_STALL_INTERVAL, FLUE_VALVE_ACTIVE_TIME);
+ServoController boilerValve("boilerValve", BOILER_VALVE_PIN, BOILER_VALVE_SYNC_INTERVAL, BOILER_VALVE_ANTI_STALL_INTERVAL, BOILER_VALVE_ACTIVE_TIME);
 ServoController *valves[] = {&flueValve, &boilerValve};
 int valvesCount = sizeof(valves) / sizeof(valves[0]);
 

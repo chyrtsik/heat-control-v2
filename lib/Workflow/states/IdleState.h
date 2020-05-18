@@ -21,7 +21,7 @@ class IdleState : public WorkflowState
     }
 
     void printStatus(JsonObject &stateJsonNode){
-
+      //TODO - log here diagnostic info (heaters / pump health). Also, this is possible, that health is to be stored together with them and always logged
     }
 
     bool canEnter(){
@@ -35,8 +35,12 @@ class IdleState : public WorkflowState
     
     void sync(){
       //TODO - check pump periodically (once a month)
+
       //TODO - check heaters periodically (once a 1-2 months)
-      //TODO - perform servos anti-stall (once per week)
+
+      //Ensure that valves do not stuck 
+      flueServo->syncAntiStall();
+      boilerServo->syncAntiStall();
     }
     
     bool canExit(){

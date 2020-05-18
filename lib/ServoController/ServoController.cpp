@@ -1,18 +1,12 @@
 #include "ServoController.h"
 #include <EspDebug.h>
 
-ServoController::ServoController(const char *servoName, unsigned long servoPin, unsigned long syncInterval, unsigned long antiStallInterval, unsigned long activeTime, ServoValueSupplier getValueFn){
+ServoController::ServoController(const char *servoName, unsigned long servoPin, unsigned long syncInterval, unsigned long antiStallInterval, unsigned long activeTime){
   this->servoName = servoName;
   this->servoPin = servoPin;
   this->syncInterval = syncInterval;
   this->antiStallInterval = antiStallInterval;
   this->activeTime = activeTime;
-  this->getValueFn = getValueFn;
-}
-
-void ServoController::sync(){
-  syncValue();
-  syncAntiStall();
 }
 
 const char *ServoController::getName(){
@@ -34,10 +28,9 @@ void ServoController::syncAntiStall(){
   }
 }    
 
-void ServoController::syncValue(){
+void ServoController::syncValue(int newValue){
   if (isTimeForSync(lastServoSyncTime, syncInterval)){
     DEBUG_PRINTF("Recalculating value for servo: %s\n", getName());
-    int newValue = getValueFn();
     if (abs(newValue - currentValue) >= 5){
       //Move servo only in case of significant value changes - make less noises and save servo's live.
       setValue(newValue);
