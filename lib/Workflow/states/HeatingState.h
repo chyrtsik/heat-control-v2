@@ -4,6 +4,10 @@
 #include "../WorkflowState.h"
 #include "../common/PumpChecker.h"
 
+#include <TemperatureSensor.h>
+#include <Switch.h>
+#include <ServoController.h>
+
 //TODO - place these values to config 
 #define MAX_OUTSITE_TEMPERATURE 20.0
 #define MIN_OUTSIDE_TEMPERATURE -20.0
@@ -67,6 +71,58 @@ class HeatingState : public WorkflowState
       }
     }
 
+    bool isFireHeatingEngaged(){
+      float boilerTemperature = boiler->getTemperature();
+      return boiler->getTemperature() > HEATER_MAX_TEMPERATURE + HEATER_DELTA_TEMPERATURE   //Boiler cannot become due to electric heater
+          || flue->getTemperature() > boilerTemperature;                                    //Flue is only hot when there is a fire 
+    }
+
+    int calculateFlueValveValue(){
+      float temperature = max(flue->getTemperature(), boiler->getTemperature());
+      if (temperature < -100){
+        return 40; //Default mode - temperature sensor is not working
+      }
+      else if (temperature <= 20){
+        return 0;  
+      }
+      else if (temperature >= 100){
+        return 80;  
+      }
+      else{
+        return 80 - 80 * (1 - (temperature - 20) / (100.0 - 20.0)); //Linear scale between 20 and 100 celsius (20 = 100%, 100 = 0%)  
+      } 
+    }
+
+    int calculateBoilerValveValue(){
+      //Decide boiler temperature from the outside temperature
+      const int minTemperatureValue = 40; //Servo position with min temperature
+      const int maxTemperatureValue = 100; //Servo position with max temperature
+      const int maxOutsideTemperature = 10;
+      const int minOutsideTemperature = -20;
+      float temperature = outside->getTemperature();
+      if (temperature < -100){
+        return minTemperatureValue; //Default mode - temperature sensor is not working, so, do not overheat
+      }
+      else if (temperature >= maxOutsideTemperature){
+        return minTemperatureValue;  //Edge case - the warmest weather supported
+      }
+      else if (temperature <= minOutsideTemperature){
+        return maxTemperatureValue;         //Edge case - the coldest weather supported
+      }
+      else{
+        return minTemperatureValue + (maxTemperatureValue - minTemperatureValue) * (maxOutsideTemperature - temperature) / (maxOutsideTemperature - minOutsideTemperature); //linear scale between min and max values
+      }
+    }
+
+    void syncServos(){
+      if (isFireHeatingEngaged()){
+        flueServo->syncValue(calculateFlueValveValue());
+        boilerServo->syncValue(calculateBoilerValveValue());
+      }
+      flueServo->syncAntiStall();
+      boilerServo->syncAntiStall();
+    }
+
   public:
     HeatingState(
       TemperatureSensor *boiler, TemperatureSensor *outside, TemperatureSensor *flue,
@@ -95,8 +151,9 @@ class HeatingState : public WorkflowState
     void printStatus(JsonObject &stateJsonNode){
       float outsideTemperature = outside->getTemperature();
       float workingTemperature = calculateWorkingTemperature(outsideTemperature);
-      stateJsonNode["workingTemperature"] = workingTemperature;
-      stateJsonNode["engagedHeaters"] = isNeedSecondHeater(boiler->getTemperature(), workingTemperature, outsideTemperature) ? 2 : 1;
+      stateJsonNode["electricHeatingWorkingTemperature"] = workingTemperature;
+      stateJsonNode["electricMaxHeatersEngaged"] = isNeedSecondHeater(boiler->getTemperature(), workingTemperature, outsideTemperature) ? 2 : 1;
+      stateJsonNode["fireHeatingEngaged"] = isFireHeatingEngaged() ? "on" : "off";
     }
 
     bool canEnter(){
@@ -104,14 +161,15 @@ class HeatingState : public WorkflowState
     }
     void onEnter(){
       pump->turnOn();
+      flueServo->setValue(FLUE_VALVE_DEFAULT_VALUE);
+      boilerServo->setValue(BOILER_VALVE_DEFAULT_VALUE);
     }
     
     void sync(){
       pumpChecker->check();
-      flueServo->sync();
-      boilerServo->sync();
       syncHeater();
       syncFlueCooler();
+      syncServos();
     }
     
     bool canExit(){
