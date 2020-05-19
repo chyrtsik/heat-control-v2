@@ -11,24 +11,30 @@ class TurnOffHeatingTransition : public WorkflowTransition
 {
   public:
     TemperatureSensor *outside;
+    FlowSensor *flow;
     HeatingPowerSupplier heatingPower;
 
-    TurnOffHeatingTransition(TemperatureSensor *outside, HeatingPowerSupplier heatingPower){
+    TurnOffHeatingTransition(TemperatureSensor *outside, FlowSensor *flow, HeatingPowerSupplier heatingPower){
       this->outside = outside;
+      this->flow = flow;
       this->heatingPower = heatingPower;
     }
 
   private: 
     bool isTooHot(){
-      return outside->getTemperature() >= 20; //TODO - make this configurable
+      return outside->getTemperature() >= 20;   //TODO - make this configurable
     }
 
     bool isWarmEnough(){
-      return outside->getTemperature() >= 15; //TODO - make this configurable
+      return outside->getTemperature() >= 15;   //TODO - make this configurable
     }
 
     bool isTooLittleHeatingPower(){
-      return heatingPower() < 0.2; //TODO - make configurable
+      return heatingPower() < 0.2;              //TODO - make configurable
+    }
+
+    bool isTooLittleFlow(){
+      return flow->getLitresPerMinute() < 9.0;  //TODO - make configurable
     }
 
   public:
@@ -37,7 +43,7 @@ class TurnOffHeatingTransition : public WorkflowTransition
     }
 
     bool canHappen(){
-      return isTooHot() || (isWarmEnough() ? isTooLittleHeatingPower() : false);
+      return isTooHot() || (isWarmEnough() && isTooLittleHeatingPower() && isTooLittleFlow());
     }
 };
 
