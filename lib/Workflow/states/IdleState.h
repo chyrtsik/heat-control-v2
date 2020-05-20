@@ -2,16 +2,24 @@
 #define __IDLE_STATE__INCLUDED__
 
 #include "../WorkflowState.h"
+#include "../common/PumpFlowMeasurer.h"
 
 #include <ServoController.h>
+
+#define IDLE_TIME_BETWEEN_FLOW_CHECKS 604800000 //Each 7 days = 14 * 24 * 60 * 60 * 1000 ms
+#define IDLE_FLOW_CHECK_DURATION      120000   //2 minutes = 2 * 60 * 1000 ms
+#define IDLE_PUMP_HEALTHY_FLOW_THRESHOLD 8.0
 
 class IdleState : public WorkflowState
 { 
   private:  
     ServoController *flueServo, *boilerServo;
+    PumpFlowMeasurer pumpFlowMeasurer;
 
   public:
-    IdleState(ServoController *flueServo, ServoController *boilerServo){
+    IdleState(ServoController *flueServo, ServoController *boilerServo, Switch *pump, FlowSensor *flow)
+    : pumpFlowMeasurer(pump, flow, IDLE_TIME_BETWEEN_FLOW_CHECKS, IDLE_FLOW_CHECK_DURATION)
+    {
       this->flueServo = flueServo;
       this->boilerServo = boilerServo;
     }
@@ -21,7 +29,11 @@ class IdleState : public WorkflowState
     }
 
     void printStatus(JsonObject &stateJsonNode){
-      //TODO - log here diagnostic info (heaters / pump health). Also, this is possible, that health is to be stored together with them and always logged
+      if (!pumpFlowMeasurer.isBusy()){
+        float lastMeasuredFlow = pumpFlowMeasurer.getLastMeasuredFlow();
+        stateJsonNode["pumpIsHealthy"] = lastMeasuredFlow >= IDLE_PUMP_HEALTHY_FLOW_THRESHOLD;
+        stateJsonNode["pumpLastMeasuredFlow"] = lastMeasuredFlow;
+      }
     }
 
     bool canEnter(){
@@ -34,7 +46,8 @@ class IdleState : public WorkflowState
     }
     
     void sync(){
-      //TODO - check pump periodically (once a month)
+      //Check pump periodically (once a week or so)
+      pumpFlowMeasurer.getLastMeasuredFlow();  //Do nothing with it - calculation requires flow triggering
 
       //TODO - check heaters periodically (once a 1-2 months)
 
@@ -44,9 +57,9 @@ class IdleState : public WorkflowState
     }
     
     bool canExit(){
-      //TODO - return false when it will be a process of checking something
-      return true;
+      return true; //Override in case there will be operation which cannot be cancelled.
     }
+
     void onExit(){
     }
 };

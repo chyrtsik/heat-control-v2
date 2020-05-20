@@ -17,10 +17,12 @@ const char *Switch::getName(){
 
 void Switch::turnOn(){
   bus->setBit(bitNo, true);
+  lastStateChange = millis();
 }
 
 void Switch::turnOff(){
   bus->setBit(bitNo, false);
+  lastStateChange = millis();
 }
 
 unsigned long Switch::getTimeInLastState(){

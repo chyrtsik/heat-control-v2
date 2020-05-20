@@ -3,6 +3,7 @@
 
 #include "../WorkflowState.h"
 #include "../common/PumpChecker.h"
+#include "../WorkflowTransition.h"
 
 #include <list>
 #include <Switch.h>
@@ -34,7 +35,9 @@ class ErrorState : public WorkflowState
     }
 
     void enableErrorMode(){
-      pump->turnOn();
+      if (!pumpChecker->isBusy()){
+        pump->turnOn();
+      }
       cooler->turnOn();
       heater1->turnOff();
       heater2->turnOff();
@@ -51,8 +54,6 @@ class ErrorState : public WorkflowState
       }
       else{ 
         //Just ensure that heating is not enabled
-        pump->turnOn();
-        cooler->turnOn();
         heater1->turnOff();
         heater2->turnOff();
         heater3->turnOff();
