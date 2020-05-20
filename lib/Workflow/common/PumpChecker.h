@@ -1,6 +1,7 @@
 #ifndef __PUMP_CHECKER__INCLUDED__
 #define __PUMP_CHECKER__INCLUDED__
 
+#include <EspDebug.h>
 #include <Switch.h>
 #include <FlowSensor.h>
 
@@ -27,12 +28,13 @@ class PumpChecker {
           isResetting = false;
           pump->turnOn();
           lastPumpCheckTime = currentTime;
+          DEBUG_PRINT_LN("PumpChecker: Finished pump restart");
         }
-        lastPumpCheckTime = millis();
       }
       else if (currentTime - lastPumpCheckTime > PUMP_CHECK_DELAY){
         if (pump->isOn() && flow->getLitresPerMinute() < 0.01){
           //Pump is supposed to be on, but there is no flow, pump relay might be reset. Need to switch it on again (will turn off and turn on with delay).
+          DEBUG_PRINT_LN("PumpChecker: Starting pump restart");
           isResetting = true;
           pump->turnOff();
           resetStart = currentTime;

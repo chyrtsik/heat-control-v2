@@ -18,6 +18,8 @@
 #include "transitions/errors/TemperatureSensorErrorTransition.h"
 #include "transitions/errors/UnexpectedHeatingErrorTransition.h"
 
+#define WORKFLOW_SYNC_DELAY 1000
+
 class Workflow {
   private:
     std::map<WorkflowState*, std::map<WorkflowTransition*, WorkflowState*>*> nodes;
@@ -50,7 +52,7 @@ class Workflow {
     , overHeatingErrorTransition(boiler)
     , temperatureSensorErrorTransition(boiler)
     , unexpectedHeatingErrorTransition(boiler, flue, &turnOnHeatingTransition)
-    , idleState(flueServo, boilerServo)
+    , idleState(flueServo, boilerServo, pump, flow)
     , errorState( {&overHeatingErrorTransition, &temperatureSensorErrorTransition,&unexpectedHeatingErrorTransition}, alarm, pump, cooler, heater1, heater2, heater3, flueServo, boilerServo, &pumpChecker)
     , heatingState(boiler, outside, flue, pump, cooler, heater1, heater2, heater3, flueServo, boilerServo, &pumpChecker)
      {
@@ -89,15 +91,12 @@ class Workflow {
         DEBUG_PRINTF("Workflow: initialized with %s state\n", currentState->getName());
       }
 
-      if (lastSync == 0 || millis() - lastSync > 3000){
+      if (lastSync == 0 || millis() - lastSync > WORKFLOW_SYNC_DELAY){
         this->currentState->sync();
         if (this->currentState->canExit()){
-          DEBUG_PRINT_LN("Workflow: Checking outgoing transitions");
           std::map<WorkflowTransition*, WorkflowState*> *outgoing = nodes[currentState];
-          DEBUG_PRINTF("Workflow: Have %d transitions to check\n", outgoing->size());
           std::map<WorkflowTransition*, WorkflowState*>::iterator it;
           for (it = outgoing->begin(); it != outgoing->end(); it++){
-            DEBUG_PRINTF("Workflow: Checking transition %s\n", it->first->getName());
             if (it->first->canHappen()){
               DEBUG_PRINTF("Workflow: about to change state from %s to %s\n", currentState->getName(), it->second->getName());
               currentState->onExit();
@@ -107,9 +106,6 @@ class Workflow {
               break;
             }
           }
-        }
-        else{
-          DEBUG_PRINT_LN("Cannot exit current state");
         }
         lastSync = millis();
       }
