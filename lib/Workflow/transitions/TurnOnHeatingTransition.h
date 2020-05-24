@@ -7,8 +7,11 @@
 #include <FlowSensor.h>
 #include <Switch.h>
 
-#define TURN_ON_HEATING_TIME_BETWEEN_FLOW_CHECKS 3600000   //Check pump each hour  
-#define TURN_ON_HEATING_FLOW_CHECK_DURATION      30000     //Measure flow for long enough
+#define TURN_ON_HEATING_TIME_BETWEEN_FLOW_CHECKS    3600000   //Check pump each hour  
+#define TURN_ON_HEATING_FLOW_CHECK_DURATION         30000     //Measure flow for long enough
+#define TURN_ON_HEATING_FLOW_THRESHOLD              10.0      //Value above this trigger heating enabling (some of heating devices are open for heating) 
+#define TURN_ON_HEATING_TRY_TEMPERATURE_THRESHOLD   15.0      //Min temperature to start checking the need for heating
+#define TURN_ON_HEATING_FORCE_TEMPERATURE_THRESHOLD 1.0       //Min temperature to start heating unconditionally
 
 class TurnOnHeatingTransition : public WorkflowTransition
 {
@@ -24,15 +27,15 @@ class TurnOnHeatingTransition : public WorkflowTransition
 
   private:
     bool isTooCold(){
-      return outside->getTemperature() < 0; //TODO - make this configurable
+      return outside->getTemperature() < TURN_ON_HEATING_FORCE_TEMPERATURE_THRESHOLD;
     }
 
     bool isColdENoughToTryFlow(){
-      return outside->getTemperature() < 15; //TODO - make this configurable
+      return outside->getTemperature() < TURN_ON_HEATING_TRY_TEMPERATURE_THRESHOLD;
     }
 
     bool hasEnoughWaterFlow(){
-        return pumpFlowMeasurer.getLastMeasuredFlow() > 10.0; //TODO - make this configurable
+        return pumpFlowMeasurer.getLastMeasuredFlow() > TURN_ON_HEATING_FLOW_THRESHOLD; 
     }
 
   public:
