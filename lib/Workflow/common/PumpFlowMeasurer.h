@@ -42,7 +42,7 @@ class PumpFlowMeasurer {
             measurementStart = currentTime;
             pump->turnOn();
           }
-          else if (pump->getTimeInLastState() > timeBetweenMeasurements){
+          else if (pump->getTimeInLastState() > measurementDuration){
             //Pump is already running. We can use flow measurements right away.
             measuredFlow = flow->getLitresPerMinute();
             lastMeasurement = currentTime;
