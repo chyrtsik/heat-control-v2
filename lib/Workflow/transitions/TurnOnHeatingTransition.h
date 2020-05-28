@@ -9,8 +9,8 @@
 
 #define TURN_ON_HEATING_TIME_BETWEEN_FLOW_CHECKS    3600000   //Check pump each hour  
 #define TURN_ON_HEATING_FLOW_CHECK_DURATION         30000     //Measure flow for long enough
-#define TURN_ON_HEATING_FLOW_THRESHOLD              10.0      //Value above this trigger heating enabling (some of heating devices are open for heating) 
-#define TURN_ON_HEATING_TRY_TEMPERATURE_THRESHOLD   15.0      //Min temperature to start checking the need for heating
+#define TURN_ON_HEATING_FLOW_THRESHOLD              15.0      //Value above this trigger heating enabling (some of heating devices are open for heating) 
+#define TURN_ON_HEATING_TRY_TEMPERATURE_THRESHOLD   12.0      //Min temperature to start checking the need for heating
 #define TURN_ON_HEATING_FORCE_TEMPERATURE_THRESHOLD 1.0       //Min temperature to start heating unconditionally
 
 class TurnOnHeatingTransition : public WorkflowTransition
