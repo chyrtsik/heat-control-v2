@@ -29,8 +29,8 @@
 
 #ifdef DEBUG_BOARD
 
-const char *SERVICE_NAME = "boiler-v2-dev";    //"-dev" indicates development board.
-DeviceAddress boardSensorAddress   = {40, 255, 81, 242, 35, 23, 3, 118};   //DEV board sensor
+const char *SERVICE_NAME = "heating-dev";    //"-dev" indicates development board.
+DeviceAddress boardSensorAddress   = {40, 255, 55, 222, 35, 23, 3, 153};   //DEV board sensor
 DeviceAddress &boilerSensorAddress = boardSensorAddress;
 DeviceAddress &feedSensorAddress   = boardSensorAddress;
 DeviceAddress &returnSensorAddress  = boardSensorAddress;
@@ -40,8 +40,8 @@ DeviceAddress &flueSensorAddress  = boardSensorAddress;
 
 #else //DEBUG_BOARD
 
-const char *SERVICE_NAME = "boiler-v2";    
-DeviceAddress boardSensorAddress   = {40, 255, 239, 232,  35,  23,  3, 184};   //Different for each board
+const char *SERVICE_NAME = "heating";    
+DeviceAddress boardSensorAddress   = {40, 255, 55, 222, 35, 23, 3, 153};   //Different for each board
 DeviceAddress boilerSensorAddress  = {40,   0,   9,   0, 226,  56, 34, 161};
 DeviceAddress feedSensorAddress    = {40,   0,   9,   0,   1, 110, 34,  95};
 DeviceAddress returnSensorAddress  = {40,   0,   9,   0, 245,  57, 34,  85};
@@ -56,34 +56,21 @@ DeviceAddress flueSensorAddress  =   {40, 255, 232,  17,  36,  23,  3, 113};
 const int bits_no_select[] = {0,0,0,0,0,0,0,0};
 const int bits_all_select[] = {1,1,1,1,1,1,1,1};
 
-const int BUS_ADDR_A[] = {1,0,0};
-const int BUS_ADDR_B[] = {0,1,0};
-const int BUS_ADDR_C[] = {0,0,1};
-const int BUS_ADDR_ALL[] = {1,1,1};
-
-ParallelBus busA(BUS_ADDR_A);
-ParallelBus busB(BUS_ADDR_B);
-ParallelBus busC(BUS_ADDR_C);
+ParallelBus busA;
 
 //////////////////////////////////////////////////
 // Water flow control
-Switch flowSensorPower(busA, 7, "flowSensor");
-FlowSensor flowSensor(PIN_DIGITAL_IO, &flowSensorPower);
+FlowSensor flowSensor(PIN_DIGITAL_IO);
 
 ////////////////////////////////////////////////
 // LED indicators
-Switch ledWiFi(busB, 0, "ledWifi");
-Switch ledConsul(busB, 1, "ledConsul");
-Switch ledTemp(busB, 2, "ledTemp");
-Switch ledBusy(busB, 3, "ledBusy");
-Switch ledAlarm(busB, 4, "ledAlarm");
 
 void busy(){
-  ledBusy.turnOn();  
+  digitalWrite(PIN_LED, LED_ON);
 }
 
 void notBusy(){
-  ledBusy.turnOff();  
+  digitalWrite(PIN_LED, LED_OFF);
 }
 
 
@@ -91,13 +78,13 @@ void notBusy(){
 // Temperature sensors
 OneWire oneWire(ONE_WIRE_BUS); 
 DallasTemperature sensors(&oneWire);
-TemperatureSensor boardTemp(sensors, boardSensorAddress, "boardTemperature", &ledTemp);
-TemperatureSensor boilerTemp(sensors, boilerSensorAddress, "boilerTemperature", &ledTemp);
-TemperatureSensor feedTemp(sensors, feedSensorAddress, "feedTemperature", &ledTemp);
-TemperatureSensor returnTemp(sensors, returnSensorAddress, "returnTemperature", &ledTemp);
-TemperatureSensor outsideTemp(sensors, outsideSensorAddress,"outsideTemperature", &ledTemp);
-TemperatureSensor insideTemp(sensors, insideSensorAddress, "insideTemperature", &ledTemp);
-TemperatureSensor flueTemp(sensors, flueSensorAddress, "flueTemperature", &ledTemp);
+TemperatureSensor boardTemp(sensors, boardSensorAddress, "boardTemperature");
+TemperatureSensor boilerTemp(sensors, boilerSensorAddress, "boilerTemperature");
+TemperatureSensor feedTemp(sensors, feedSensorAddress, "feedTemperature");
+TemperatureSensor returnTemp(sensors, returnSensorAddress, "returnTemperature");
+TemperatureSensor outsideTemp(sensors, outsideSensorAddress,"outsideTemperature");
+TemperatureSensor insideTemp(sensors, insideSensorAddress, "insideTemperature");
+TemperatureSensor flueTemp(sensors, flueSensorAddress, "flueTemperature");
 
 TemperatureSensor* tempSensors[] = {&boardTemp, &boilerTemp, &feedTemp, &returnTemp, &outsideTemp, &insideTemp, &flueTemp}; 
 int tempSensorsCount = sizeof(tempSensors) / sizeof(tempSensors[0]);  
@@ -106,18 +93,15 @@ int tempSensorsCount = sizeof(tempSensors) / sizeof(tempSensors[0]);
 // Relays (bit 0 = relay 1, bit 1 = relay 2 etc)
 Switch pumpRelay(busA, 0, "pump");
 Switch pump2Relay(busA, 1, "pump2"); //Placeholder for now. This is a support for secondary pump
+Switch coolerRelay(busA, 2, "cooler");
 Switch heaterRelay1(busA, 3, "heater1");
 Switch heaterRelay2(busA, 4, "heater2");
 Switch heaterRelay3(busA, 5, "heater3");
-Switch coolerRelay(busA, 2, "cooler");
-
 
 Switch* switches[] = {
   &pumpRelay, &pump2Relay, 
   &heaterRelay1, &heaterRelay2, &heaterRelay3, 
-  &coolerRelay, 
-  &flowSensorPower, 
-  &ledWiFi, &ledConsul, &ledTemp, &ledBusy, &ledAlarm
+  &coolerRelay
 };
 int switchesCount = sizeof(switches) / sizeof(switches[0]);
 
@@ -125,10 +109,10 @@ int switchesCount = sizeof(switches) / sizeof(switches[0]);
 // Servos
 
 //TODO: Remove and write normal code
-//Servo controller callback (B6, B7, B8) - this is ugly small hack until libraries are extracted from this code
+//Servo controller callback (A7, A8) - this is ugly small hack until libraries are extracted from this code
 //Right now revos can be on busB only 
 void ICACHE_RAM_ATTR bus_digitalWrite(uint8_t pin, uint8_t val){
-  busB.setBit(pin, val == HIGH);
+  busA.setBit(pin, val == HIGH);
 }
 
 float calculateCurrentPower(){
@@ -144,7 +128,7 @@ int valvesCount = sizeof(valves) / sizeof(valves[0]);
 Workflow workflow(
   &outsideTemp, &insideTemp, &boilerTemp, &flueTemp,
   &flowSensor, 
-  &pumpRelay, &coolerRelay, &ledAlarm, 
+  &pumpRelay, &coolerRelay, 
   &heaterRelay1, &heaterRelay2, &heaterRelay3, 
   &flueValve, &boilerValve, 
   calculateCurrentPower
@@ -158,8 +142,6 @@ void syncBus(){
   if (lastBusSyncTime == 0 || millis() - lastBusSyncTime > BUS_SYNC_DELAY){
     //Flush states to buses (to prevent them from random status changes due to interference)	
     busA.sync();
-    busB.sync();
-    busC.sync();
     lastBusSyncTime = millis();
   }
 }
@@ -177,25 +159,26 @@ void setupBus(){
 // Code responsible for WiFi server funtionality
 
 const int REGISTRATION_REFRESH_INTERVAL = 60000;
-ConsulRegistration registration(SERVICE_NAME, REGISTRATION_REFRESH_INTERVAL, &ledConsul);
+ConsulRegistration registration(SERVICE_NAME, REGISTRATION_REFRESH_INTERVAL);
 
 const int SERVER_PORT = 80;
 ESP8266WebServer server(SERVER_PORT);
 
+bool isInWifi = false;
 void processServer() {
   server.handleClient();
-  if (ledWiFi.isOn()){
+  if (isInWifi){
     registration.refresh();
   }
 }
 
 void onGotIP(const WiFiEventStationModeGotIP& event){
   DEBUG_PRINT_LN("Connected and got IP.");
-	ledWiFi.turnOn();     
+	isInWifi = true;     
 }
 
 void onDisconnect(const WiFiEventStationModeDisconnected& event){
-	ledWiFi.turnOff();
+	isInWifi = false;
 }
 
 WiFiEventHandler onConnectHandler, onDisconnectHandler, onIPHandler;
@@ -240,6 +223,7 @@ void setupServer() {
 
 void setup() {
   DEBUG_INIT();
+  pinMode(PIN_LED, OUTPUT);
   setupBus();
   setupServer();
 }

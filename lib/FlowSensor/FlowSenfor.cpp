@@ -8,11 +8,10 @@ void ICACHE_RAM_ATTR flowTick()
   ticks++;
 } 
 
-FlowSensor::FlowSensor(int interruptPin, Switch *powerSwitch)
+FlowSensor::FlowSensor(int interruptPin)
 {
   ticks = 0;
   attachInterrupt(interruptPin, /*FlowSensor::*/flowTick, RISING);
-  powerSwitch->turnOn();
 }
 
 void FlowSensor::syncSpeed(){

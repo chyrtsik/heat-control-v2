@@ -9,13 +9,12 @@ class TemperatureSensor{
     DallasTemperature *sensors;
     DeviceAddress *sensorAddress;
     const char *sensorName;
-    Switch *ledTemp;
-
+    
     float lastTempValue;
     unsigned long lastMeasurement = 0;
     
   public:
-    TemperatureSensor(DallasTemperature &sensors, DeviceAddress &sensorAddress, const char *sensorName, Switch *ledTemp);
+    TemperatureSensor(DallasTemperature &sensors, DeviceAddress &sensorAddress, const char *sensorName);
 
     float getTemperature();
 

@@ -43,7 +43,7 @@ class Workflow {
     Workflow(
       TemperatureSensor *outside, TemperatureSensor *inside, TemperatureSensor *boiler, TemperatureSensor *flue, 
       FlowSensor *flow, 
-      Switch *pump, Switch *cooler, Switch *alarm,
+      Switch *pump, Switch *cooler,
       Switch *heater1, Switch *heater2, Switch *heater3,
       ServoController *flueServo, ServoController *boilerServo, 
       HeatingPowerSupplier heatingPower
@@ -59,7 +59,7 @@ class Workflow {
     , heatingState(boiler, outside, flue, pump, cooler, heater1, heater2, heater3, flueServo, boilerServo, &pumpChecker)
     , errorState( 
         {&overHeatingErrorTransition, &temperatureSensorErrorTransition,&unexpectedHeatingErrorTransition, &pumpFailureErrorTransition}, 
-        alarm, pump, cooler, heater1, heater2, heater3, flueServo, boilerServo, &pumpChecker
+        pump, cooler, heater1, heater2, heater3, flueServo, boilerServo, &pumpChecker
       )
      {
         currentState = &idleState;

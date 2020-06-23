@@ -13,7 +13,7 @@ class FlowSensor {
     long ticksPerMinute = 0;
       
   public:
-    FlowSensor(int interruptPin, Switch *powerSwitch);
+    FlowSensor(int interruptPin);
 
     void syncSpeed();
 
