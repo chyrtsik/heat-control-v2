@@ -41,14 +41,14 @@ class Workflow {
 
   public:
     Workflow(
-      TemperatureSensor *outside, TemperatureSensor *boiler, TemperatureSensor *flue, 
+      TemperatureSensor *outside, TemperatureSensor *inside, TemperatureSensor *boiler, TemperatureSensor *flue, 
       FlowSensor *flow, 
       Switch *pump, Switch *cooler, Switch *alarm,
       Switch *heater1, Switch *heater2, Switch *heater3,
       ServoController *flueServo, ServoController *boilerServo, 
       HeatingPowerSupplier heatingPower
     ) 
-    : turnOnHeatingTransition(outside, flow, pump)
+    : turnOnHeatingTransition(outside, inside, flow, pump)
     , turnOffHeatingTransition(outside, flow, heatingPower)
     , pumpChecker(pump, flow)
     , overHeatingErrorTransition(boiler)
