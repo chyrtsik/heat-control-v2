@@ -142,7 +142,7 @@ ServoController *valves[] = {&flueValve, &boilerValve};
 int valvesCount = sizeof(valves) / sizeof(valves[0]);
 
 Workflow workflow(
-  &outsideTemp, &boilerTemp, &flueTemp,
+  &outsideTemp, &insideTemp, &boilerTemp, &flueTemp,
   &flowSensor, 
   &pumpRelay, &coolerRelay, &ledAlarm, 
   &heaterRelay1, &heaterRelay2, &heaterRelay3, 
