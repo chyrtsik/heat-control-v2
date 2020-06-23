@@ -3,22 +3,16 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
 
-ConsulRegistration::ConsulRegistration(const char *serviceName, int refreshInterval, Switch *ledConsul){
+ConsulRegistration::ConsulRegistration(const char *serviceName, int refreshInterval){
   this->refreshInterval = refreshInterval;
   this->serviceName = serviceName;
   this->lastRefresh = 0;
-  this->ledConsul = ledConsul;
 }
 
 void ConsulRegistration::refresh(){
   if (lastRefresh == 0 || abs(millis() - lastRefresh) >= refreshInterval){
     lastRefresh = millis();
-    if (registerInConsul()){
-      ledConsul->turnOn();
-    }
-    else{
-      ledConsul->turnOff();
-    }
+    registerInConsul();
   } 
 }
 

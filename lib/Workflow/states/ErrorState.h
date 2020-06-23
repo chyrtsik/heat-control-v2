@@ -63,13 +63,12 @@ class ErrorState : public WorkflowState
   public:
     ErrorState(
       TriggersList triggers, 
-      Switch *alarm, Switch *pump, Switch *cooler, 
+      Switch *pump, Switch *cooler, 
       Switch *heater1, Switch *heater2, Switch *heater3, 
       ServoController *flueServo, ServoController *boilerServo, 
       PumpChecker *pumpChecker
     ){
       this->triggers = triggers;
-      this->alarm = alarm;
       this->pump = pump;
       this->cooler = cooler;
       this->heater1 = heater1;
@@ -98,13 +97,10 @@ class ErrorState : public WorkflowState
     }
 
     void onEnter(){
-      alarm->turnOn();
-      
       originalPumpValue = pump->isOn();
       originalCoolerValue = cooler->isOn();
       originalFlueServoValue = flueServo->getValue();
       originalBoilerServoValue = boilerServo->getValue();
-
       enableErrorMode();
     }
     
@@ -118,7 +114,6 @@ class ErrorState : public WorkflowState
     }
 
     void onExit(){
-      alarm->turnOff();
       if (!originalPumpValue) {
         pump->turnOff();
       }
