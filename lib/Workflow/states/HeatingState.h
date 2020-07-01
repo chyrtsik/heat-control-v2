@@ -51,14 +51,14 @@ class HeatingState : public WorkflowState
       float outsideTemperature = outside->getTemperature();
       float workingTemperature = calculateWorkingTemperature(outsideTemperature);
       if (boilerTemperature < workingTemperature - HEATER_DELTA_TEMPERATURE){
-        heater2->turnOn(); //TODO - implement check for power needed and engage more then one heater is required
+        heater1->turnOn(); //TODO - implement check for power needed and engage more then one heater is required
         if (isNeedSecondHeater(boilerTemperature, workingTemperature, outsideTemperature)){
-          heater3->turnOn();
+          heater2->turnOn();
         }
       }
       else if (boilerTemperature > workingTemperature + HEATER_DELTA_TEMPERATURE){
-        heater2->turnOff(); 
-        heater3->turnOff();
+        heater1->turnOff(); 
+        heater2->turnOff();
       }
     }
 
