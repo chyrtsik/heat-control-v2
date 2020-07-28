@@ -30,7 +30,7 @@
 #ifdef DEBUG_BOARD
 
 const char *SERVICE_NAME = "heating-dev";    //"-dev" indicates development board.
-DeviceAddress boardSensorAddress   = {40, 255, 55, 222, 35, 23, 3, 153};   //DEV board sensor
+DeviceAddress boardSensorAddress   = {40, 63, 193, 11, 11, 0, 0, 109};   //DEV board sensor
 DeviceAddress &boilerSensorAddress = boardSensorAddress;
 DeviceAddress &feedSensorAddress   = boardSensorAddress;
 DeviceAddress &returnSensorAddress  = boardSensorAddress;
@@ -41,7 +41,7 @@ DeviceAddress &flueSensorAddress  = boardSensorAddress;
 #else //DEBUG_BOARD
 
 const char *SERVICE_NAME = "heating";    
-DeviceAddress boardSensorAddress   = {40, 255, 55, 222, 35, 23, 3, 153};   //Different for each board
+DeviceAddress boardSensorAddress   = {40,  63, 193,  11,  11,   0,  0, 109};   //Different for each board
 DeviceAddress boilerSensorAddress  = {40,   0,   9,   0, 226,  56, 34, 161};
 DeviceAddress feedSensorAddress    = {40,   0,   9,   0,   1, 110, 34,  95};
 DeviceAddress returnSensorAddress  = {40,   0,   9,   0, 245,  57, 34,  85};
@@ -222,10 +222,14 @@ void setupServer() {
 }
 
 void setup() {
+  busy();
+
   DEBUG_INIT();
   pinMode(PIN_LED, OUTPUT);
   setupBus();
   setupServer();
+  
+  notBusy();
 }
 
 #ifndef DEBUG_MODE
