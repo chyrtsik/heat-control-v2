@@ -30,7 +30,7 @@
 #ifdef DEBUG_BOARD
 
 const char *SERVICE_NAME = "heating-dev";    //"-dev" indicates development board.
-DeviceAddress boardSensorAddress   = {40, 63, 193, 11, 11, 0, 0, 109};   //DEV board sensor
+DeviceAddress boardSensorAddress   = {40, 101, 180, 11, 11, 0, 0, 51};   //DEV board sensor
 DeviceAddress &boilerSensorAddress = boardSensorAddress;
 DeviceAddress &feedSensorAddress   = boardSensorAddress;
 DeviceAddress &returnSensorAddress  = boardSensorAddress;
