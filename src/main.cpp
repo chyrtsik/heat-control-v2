@@ -120,8 +120,8 @@ float calculateCurrentPower(){
   return 4.2 * (feedTemp.getTemperature() - returnTemp.getTemperature()) * flowSensor.getLitresPerMinute() / 60.0;
 }
 
-ServoController flueValve("flueValve", FLUE_VALVE_PIN, FLUE_VALVE_SYNC_INTERVAL, FLUE_VALVE_ANTI_STALL_INTERVAL, FLUE_VALVE_ACTIVE_TIME);
-ServoController boilerValve("boilerValve", BOILER_VALVE_PIN, BOILER_VALVE_SYNC_INTERVAL, BOILER_VALVE_ANTI_STALL_INTERVAL, BOILER_VALVE_ACTIVE_TIME);
+ServoController flueValve("flueValve", FLUE_VALVE_PIN, FLUE_VALVE_CLOSED_VALUE, FLUE_VALVE_OPEN_VALUE, FLUE_VALVE_SYNC_INTERVAL, FLUE_VALVE_ANTI_STALL_INTERVAL, FLUE_VALVE_ACTIVE_TIME);
+ServoController boilerValve("boilerValve", BOILER_VALVE_PIN, BOILER_VALVE_CLOSED_VALUE, BOILER_VALVE_OPEN_VALUE, BOILER_VALVE_SYNC_INTERVAL, BOILER_VALVE_ANTI_STALL_INTERVAL, BOILER_VALVE_ACTIVE_TIME);
 ServoController *valves[] = {&flueValve, &boilerValve};
 int valvesCount = sizeof(valves) / sizeof(valves[0]);
 
