@@ -12,12 +12,13 @@ class ServoController {
     const char *servoName;  
     Servo servo;
 
+    int minValue, maxValue; //Applicable range of values for this servo
     int currentValue = 0; 
     unsigned long lastServoSyncTime = 0;
     unsigned long lastAntiStallSyncTime = 0;
   
   public:
-    ServoController(const char *servoName, unsigned long servoPin, unsigned long syncInterval, unsigned long antiStallInterval, unsigned long activeTime);
+    ServoController(const char *servoName, unsigned long servoPin, int minValue, int maxValue, unsigned long syncInterval, unsigned long antiStallInterval, unsigned long activeTime);
   
     void syncAntiStall();
   

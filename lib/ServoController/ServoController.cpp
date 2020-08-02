@@ -1,9 +1,11 @@
 #include "ServoController.h"
 #include <EspDebug.h>
 
-ServoController::ServoController(const char *servoName, unsigned long servoPin, unsigned long syncInterval, unsigned long antiStallInterval, unsigned long activeTime){
+ServoController::ServoController(const char *servoName, unsigned long servoPin, int minValue, int maxValue, unsigned long syncInterval, unsigned long antiStallInterval, unsigned long activeTime){
   this->servoName = servoName;
   this->servoPin = servoPin;
+  this->minValue = minValue;
+  this->maxValue = maxValue;
   this->syncInterval = syncInterval;
   this->antiStallInterval = antiStallInterval;
   this->activeTime = activeTime;
@@ -20,8 +22,8 @@ const int ServoController::getValue(){
 void ServoController::syncAntiStall(){
   if (isTimeForSync(lastAntiStallSyncTime,  antiStallInterval)){
     DEBUG_PRINTF("Starting anti-stall procedure for servo: %s\n", getName());
-    sendServoValue(100); 
-    sendServoValue(0);
+    sendServoValue(maxValue); 
+    sendServoValue(minValue);
     sendServoValue(currentValue);
     DEBUG_PRINTF("Finished anti-stall procedure for servo: %s\n", getName());
     lastAntiStallSyncTime = millis();

@@ -79,38 +79,38 @@ class HeatingState : public WorkflowState
 
     int calculateFlueValveValue(){
       float temperature = max(flue->getTemperature(), boiler->getTemperature());
+      const int maxFlueTemperature = 100;
+      const int minFlueTemperature = 20;
       if (temperature < -100){
-        return 40; //Default mode - temperature sensor is not working
+        return FLUE_VALVE_DEFAULT_VALUE; //Default mode - temperature sensor is not working
       }
-      else if (temperature <= 20){
-        return 0;  
+      else if (temperature <= minFlueTemperature){
+        return FLUE_VALVE_OPEN_VALUE;  
       }
-      else if (temperature >= 100){
-        return 80;  
+      else if (temperature >= maxFlueTemperature){
+        return FLUE_VALVE_CLOSED_VALUE;  
       }
       else{
-        return 80 - 80 * (1 - (temperature - 20) / (100.0 - 20.0)); //Linear scale between 20 and 100 celsius (20 = 100%, 100 = 0%)  
+        return FLUE_VALVE_OPEN_VALUE + (FLUE_VALVE_CLOSED_VALUE - FLUE_VALVE_OPEN_VALUE) * (temperature - minFlueTemperature) / (maxFlueTemperature - minFlueTemperature); //Linear scale between 20 and 100 celsius (20 = 100%, 100 = 0%)  
       } 
     }
 
     int calculateBoilerValveValue(){
       //Decide boiler temperature from the outside temperature
-      const int minTemperatureValue = 40; //Servo position with min temperature
-      const int maxTemperatureValue = 100; //Servo position with max temperature
       const int maxOutsideTemperature = 10;
       const int minOutsideTemperature = -20;
       float temperature = outside->getTemperature();
       if (temperature < -100){
-        return minTemperatureValue; //Default mode - temperature sensor is not working, so, do not overheat
+        return BOILER_VALVE_CLOSED_VALUE; //Default mode - temperature sensor is not working, so, do not overheat
       }
       else if (temperature >= maxOutsideTemperature){
-        return minTemperatureValue;  //Edge case - the warmest weather supported
+        return BOILER_VALVE_CLOSED_VALUE;  //Edge case - the warmest weather supported
       }
       else if (temperature <= minOutsideTemperature){
-        return maxTemperatureValue;         //Edge case - the coldest weather supported
+        return BOILER_VALVE_OPEN_VALUE;         //Edge case - the coldest weather supported
       }
       else{
-        return minTemperatureValue + (maxTemperatureValue - minTemperatureValue) * (maxOutsideTemperature - temperature) / (maxOutsideTemperature - minOutsideTemperature); //linear scale between min and max values
+        return BOILER_VALVE_CLOSED_VALUE + (BOILER_VALVE_OPEN_VALUE - BOILER_VALVE_CLOSED_VALUE) * (maxOutsideTemperature - temperature) / (maxOutsideTemperature - minOutsideTemperature); //linear scale between min and max values
       }
     }
 

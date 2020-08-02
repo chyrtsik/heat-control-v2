@@ -13,14 +13,16 @@
 #define FLUE_VALVE_SYNC_INTERVAL          20000    //Each 20 seconds (needs to be interactive to control overheating)
 #define FLUE_VALVE_ANTI_STALL_INTERVAL    86400000 //Each 24 hours = 24 * 60 * 60 * 1000 ms
 #define FLUE_VALVE_ACTIVE_TIME            1000     //Time to power the servo (should be enough to rotate)        
-#define FLUE_VALVE_CLOSED_VALUE           80       //Value when flue valse is closed
+#define FLUE_VALVE_OPEN_VALUE             10       //Value when flue valse is fully open
+#define FLUE_VALVE_CLOSED_VALUE           90       //Value when flue valse is closed
 #define FLUE_VALVE_DEFAULT_VALUE          40       //Value when flue is partially open  (default for heating)
 
 #define BOILER_VALVE_PIN                   7         //A8
 #define BOILER_VALVE_SYNC_INTERVAL         1800000   //Each 30 minutes = 30 * 60 * 60 * 1000 ms
 #define BOILER_VALVE_ANTI_STALL_INTERVAL   604800000 //Each 7 days = 7 * 24 * 60 * 60 * 1000 ms
 #define BOILER_VALVE_ACTIVE_TIME           1000      //Time to power the servo (should be enough to rotate)
-#define BOILER_VALVE_CLOSED_VALUE          20        //Value when boiler valve is closed (min temperature)
+#define BOILER_VALVE_OPEN_VALUE            20        //Value when boiler valve is open (max temperature)
+#define BOILER_VALVE_CLOSED_VALUE          100       //Value when boiler valve is closed (min temperature)
 #define BOILER_VALVE_DEFAULT_VALUE         40        //Default value, when heating is needed (before fire has been detected)
 
 //////////////////////////////////////////////////////////////////////////////
