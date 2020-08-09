@@ -17,7 +17,8 @@
 #include <TermoRelay.h>
 #include <ConditionalRelay.h>
 #include <ServoController.h>
-#include <TemperatureSensor.h>
+#include <DallasTemperatureSensor.h>
+#include <HighTemperatureSensor.h>
 
 #include "WiFiCredentials.h"
 #include "Settings.h"
@@ -30,7 +31,8 @@
 #ifdef DEBUG_BOARD
 
 const char *SERVICE_NAME = "heating-dev";    //"-dev" indicates development board.
-DeviceAddress boardSensorAddress   = {40, 101, 180, 11, 11, 0, 0, 51};   //DEV board sensor
+// DeviceAddress boardSensorAddress   = {40, 101, 180, 11, 11, 0, 0, 51};   //SMD DEV board sensor
+DeviceAddress boardSensorAddress   = { 40, 255, 55, 222, 35, 23, 3, 153};   //DIP DEV board sensor
 DeviceAddress &boilerSensorAddress = boardSensorAddress;
 DeviceAddress &feedSensorAddress   = boardSensorAddress;
 DeviceAddress &returnSensorAddress  = boardSensorAddress;
@@ -60,7 +62,7 @@ ParallelBus busA;
 
 //////////////////////////////////////////////////
 // Water flow control
-FlowSensor flowSensor(PIN_DIGITAL_IO);
+FlowSensor flowSensor(PIN_DIGITAL_IO1);
 
 ////////////////////////////////////////////////
 // LED indicators
@@ -78,15 +80,16 @@ void notBusy(){
 // Temperature sensors
 OneWire oneWire(ONE_WIRE_BUS); 
 DallasTemperature sensors(&oneWire);
-TemperatureSensor boardTemp(sensors, boardSensorAddress, "boardTemperature");
-TemperatureSensor boilerTemp(sensors, boilerSensorAddress, "boilerTemperature");
-TemperatureSensor feedTemp(sensors, feedSensorAddress, "feedTemperature");
-TemperatureSensor returnTemp(sensors, returnSensorAddress, "returnTemperature");
-TemperatureSensor outsideTemp(sensors, outsideSensorAddress,"outsideTemperature");
-TemperatureSensor insideTemp(sensors, insideSensorAddress, "insideTemperature");
-TemperatureSensor flueTemp(sensors, flueSensorAddress, "flueTemperature");
+DallasTemperatureSensor boardTemp(sensors, boardSensorAddress, "boardTemperature");
+DallasTemperatureSensor boilerTemp(sensors, boilerSensorAddress, "boilerTemperature");
+DallasTemperatureSensor feedTemp(sensors, feedSensorAddress, "feedTemperature");
+DallasTemperatureSensor returnTemp(sensors, returnSensorAddress, "returnTemperature");
+DallasTemperatureSensor outsideTemp(sensors, outsideSensorAddress,"outsideTemperature");
+DallasTemperatureSensor insideTemp(sensors, insideSensorAddress, "insideTemperature");
+DallasTemperatureSensor flueTemp(sensors, flueSensorAddress, "flueTemperature");
+HighTemperatureSensor exhaustTemp(PIN_ANALOG_IN, "exhaustTemperature");
 
-TemperatureSensor* tempSensors[] = {&boardTemp, &boilerTemp, &feedTemp, &returnTemp, &outsideTemp, &insideTemp, &flueTemp}; 
+TemperatureSensor* tempSensors[] = {&boardTemp, &boilerTemp, &feedTemp, &returnTemp, &outsideTemp, &insideTemp, &flueTemp, &exhaustTemp}; 
 int tempSensorsCount = sizeof(tempSensors) / sizeof(tempSensors[0]);  
   
 ////////////////////////////////////////////////
