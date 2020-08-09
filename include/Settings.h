@@ -6,7 +6,7 @@
 
 // Timings
 #define BUS_SYNC_DELAY     1000       //Delay between resyncing state of the parallel bus
-#define TERMO_SYNC_DELAY   10000      //Delay between temperaature sensor readings
+#define TERMO_SYNC_DELAY   2000      //Delay between temperaature sensor readings
 
 //Valves configuration (controlled by servos)
 #define FLUE_VALVE_PIN                    6        //A7
@@ -40,7 +40,8 @@
 
 //Device to board pin mapping
 #define PIN_TERMO       _D5    // Pin for termo sensors only (including on board sensor)
-#define PIN_DIGITAL_IO  _D4    // General purpose digital IO pin, exposed outside
+#define PIN_DIGITAL_IO1 _D4    // General purpose digital IO pin, exposed outside
+//#define PIN_DIGITAL_IO2 _D9    // General purpose digital IO pin, exposed outside - TODO - detect this from schematic
 #define PIN_ANALOG_IN    A0    // Analog read
 
 #define PIN_LED         _D2    // Onboard led
