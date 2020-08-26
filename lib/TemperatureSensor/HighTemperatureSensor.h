@@ -30,7 +30,7 @@ class HighTemperatureSensor : public TemperatureSensor {
       }
       else if (resistance < 150){
         //26С - 100С segment
-        temp = 26.0 + (resistance - 110) / (150 - 110) * (100 - 26); //t = to + (R - R0) / (R1 - R0) * (t1 - t0) -- linear approximation by 2 points. 
+        temp = -20 /*Imperic correction*/ + 26.0 + (resistance - 110) / (150 - 110) * (100 - 26); //t = to + (R - R0) / (R1 - R0) * (t1 - t0) -- linear approximation by 2 points. 
       }
       else if (resistance < 210){
         //100С - 300С segment
