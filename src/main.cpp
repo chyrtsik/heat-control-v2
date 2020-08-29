@@ -14,6 +14,7 @@
 #include <Switch.h>
 #include <ConsulRegistration.h>
 #include <FlowSensor.h>
+#include <HeatingPowerSensor.h>
 #include <TermoRelay.h>
 #include <ConditionalRelay.h>
 #include <ServoController.h>
@@ -60,10 +61,6 @@ const int bits_all_select[] = {1,1,1,1,1,1,1,1};
 
 ParallelBus busA;
 
-//////////////////////////////////////////////////
-// Water flow control
-FlowSensor flowSensor(PIN_DIGITAL_IO1);
-
 ////////////////////////////////////////////////
 // LED indicators
 
@@ -108,6 +105,11 @@ Switch* switches[] = {
 };
 int switchesCount = sizeof(switches) / sizeof(switches[0]);
 
+//////////////////////////////////////////////////
+// Water flow control and heating power
+FlowSensor flowSensor(PIN_DIGITAL_IO1);
+HeatingPowerSensor heatingPowerSensor(&feedTemp, &returnTemp, &flowSensor);
+
 //////////////////////////////////////////////////////////////////////////
 // Servos
 
@@ -116,11 +118,6 @@ int switchesCount = sizeof(switches) / sizeof(switches[0]);
 //Right now revos can be on busB only 
 void ICACHE_RAM_ATTR bus_digitalWrite(uint8_t pin, uint8_t val){
   busA.setBit(pin, val == HIGH);
-}
-
-float calculateCurrentPower(){
-  //P = c*(T1-T0)*dm/dt
-  return 4.2 * (feedTemp.getTemperature() - returnTemp.getTemperature()) * flowSensor.getLitresPerMinute() / 60.0;
 }
 
 ServoController flueValve("flueValve", FLUE_VALVE_PIN, FLUE_VALVE_CLOSED_VALUE, FLUE_VALVE_OPEN_VALUE, FLUE_VALVE_SYNC_INTERVAL, FLUE_VALVE_ANTI_STALL_INTERVAL, FLUE_VALVE_ACTIVE_TIME);
@@ -134,7 +131,7 @@ Workflow workflow(
   &pumpRelay, &coolerRelay, 
   &heaterRelay1, &heaterRelay2, &heaterRelay3, 
   &flueValve, &boilerValve, 
-  calculateCurrentPower
+  &heatingPowerSensor
 );
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -240,6 +237,7 @@ void setup() {
 void loop() {
   syncBus();
   flowSensor.syncSpeed();
+  heatingPowerSensor.sync();
   workflow.sync();
   processServer();  
 }

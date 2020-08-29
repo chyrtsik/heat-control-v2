@@ -46,7 +46,7 @@ class Workflow {
       Switch *pump, Switch *cooler,
       Switch *heater1, Switch *heater2, Switch *heater3,
       ServoController *flueServo, ServoController *boilerServo, 
-      HeatingPowerSupplier heatingPower
+      HeatingPowerSensor *heatingPower
     ) 
     : turnOnHeatingTransition(outside, inside, flow, pump)
     , turnOffHeatingTransition(outside, flow, heatingPower)
