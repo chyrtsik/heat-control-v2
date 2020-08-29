@@ -4,17 +4,16 @@
 #include "../WorkflowTransition.h"
 #include <TemperatureSensor.h>
 #include <FlowSensor.h>
-
-typedef float (*HeatingPowerSupplier)();
+#include <HeatingPowerSensor.h>
 
 class TurnOffHeatingTransition : public WorkflowTransition
 {
   public:
     TemperatureSensor *outside;
     FlowSensor *flow;
-    HeatingPowerSupplier heatingPower;
+    HeatingPowerSensor *heatingPower;
 
-    TurnOffHeatingTransition(TemperatureSensor *outside, FlowSensor *flow, HeatingPowerSupplier heatingPower){
+    TurnOffHeatingTransition(TemperatureSensor *outside, FlowSensor *flow, HeatingPowerSensor *heatingPower){
       this->outside = outside;
       this->flow = flow;
       this->heatingPower = heatingPower;
@@ -30,7 +29,7 @@ class TurnOffHeatingTransition : public WorkflowTransition
     }
 
     bool isTooLittleHeatingPower(){
-      return heatingPower() < 0.2;              //TODO - make configurable
+      return heatingPower->getPower() < 0.2;    //TODO - make configurable
     }
 
     bool isTooLittleFlow(){
