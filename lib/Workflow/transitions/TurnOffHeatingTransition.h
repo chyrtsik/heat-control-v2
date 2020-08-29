@@ -29,11 +29,10 @@ class TurnOffHeatingTransition : public WorkflowTransition
     }
 
     bool isTooLittleHeatingPower(){
-      return heatingPower->getPower() < 0.2;    //TODO - make configurable
-    }
-
-    bool isTooLittleFlow(){
-      return flow->getLitresPerMinute() < 9.0;  //TODO - make configurable
+      return 
+        heatingPower->getPower() <= 0 && 
+        heatingPower->getPower_1m() < heatingPower->getPower_15m() &&
+        heatingPower->getPower_15m() < heatingPower->getPower_1h();
     }
 
   public:
@@ -42,7 +41,7 @@ class TurnOffHeatingTransition : public WorkflowTransition
     }
 
     bool canHappen(){
-      return isTooHot() || (isWarmEnough() && isTooLittleHeatingPower() && isTooLittleFlow());
+      return isTooHot() || (isWarmEnough() && isTooLittleHeatingPower());
     }
 };
 
