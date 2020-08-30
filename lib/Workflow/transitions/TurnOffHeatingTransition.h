@@ -24,6 +24,10 @@ class TurnOffHeatingTransition : public WorkflowTransition
       return outside->getTemperature() >= 20;   //TODO - make this configurable
     }
 
+    bool isWarmEnough(){
+      return outside->getTemperature() >= 15;   //TODO - make this configurable
+    }
+
     bool isTooLittleHeatingPower(){
       return 
         heatingPower->getPower() <= 0 && 
@@ -38,7 +42,7 @@ class TurnOffHeatingTransition : public WorkflowTransition
     }
 
     bool canHappen(){
-      return isTooHot() || isTooLittleHeatingPower();
+      return isTooHot() || (isWarmEnough() && isTooLittleHeatingPower());
     }
 };
 
