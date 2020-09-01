@@ -44,7 +44,7 @@ DeviceAddress &flueSensorAddress  = boardSensorAddress;
 #else //DEBUG_BOARD
 
 const char *SERVICE_NAME = "heating";    
-DeviceAddress boardSensorAddress   = {40,  63, 193,  11,  11,   0,  0, 109};   //Different for each board
+DeviceAddress boardSensorAddress   = {40, 101, 180,  11,  11,   0,  0,  51};   //Different for each board
 DeviceAddress boilerSensorAddress  = {40,   0,   9,   0, 226,  56, 34, 161};
 DeviceAddress feedSensorAddress    = {40,   0,   9,   0,   1, 110, 34,  95};
 DeviceAddress returnSensorAddress  = {40,   0,   9,   0, 245,  57, 34,  85};
