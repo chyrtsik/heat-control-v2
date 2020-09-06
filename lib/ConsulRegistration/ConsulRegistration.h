@@ -16,12 +16,8 @@ class ConsulRegistration{
     char requestBuffer[512] = {};
     const char *consulEndpoint = "http://192.168.2.10:8500/v1/catalog/register"; //TODO - extract to config
 
-    Switch* ledWiFi;
-    Switch* ledConsul;
-
-
   public:
-    ConsulRegistration(const char *serviceName, int refreshInterval, Switch *ledWifi, Switch *ledConsul);
+    ConsulRegistration(const char *serviceName, int refreshInterval);
     void refresh();
 
   private:

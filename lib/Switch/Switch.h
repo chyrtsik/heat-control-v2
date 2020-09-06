@@ -9,6 +9,7 @@ class Switch{
     ParallelBus *bus;
     int bitNo;
     const char *switchName;
+    unsigned long lastStateChange = 0;
     
   public:
     Switch(ParallelBus &bus, int bitNo, const char *switchName);
@@ -16,6 +17,7 @@ class Switch{
     const char *getName();
     void turnOn();
     void turnOff();
+    unsigned long getTimeInLastState();
 };
 
 #endif //__SWITCH_INCLUDED__

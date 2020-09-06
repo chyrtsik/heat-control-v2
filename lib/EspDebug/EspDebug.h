@@ -1,5 +1,8 @@
 #ifndef __ESP_DEBUG_INCLUDED__
 #define __ESP_DEBUG_INCLUDED__
+
+#include <Arduino.h>
+
 // Debugging defines for ESP
 
 //Uncomment if not defined outside
