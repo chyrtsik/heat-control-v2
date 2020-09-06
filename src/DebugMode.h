@@ -1,6 +1,6 @@
 void switchesOn(){
   for(int i=0; i<switchesCount; i++){
-    switches[i]->turnOn();
+     switches[i]->turnOn();
   }
 }
 

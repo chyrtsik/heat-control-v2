@@ -40,7 +40,7 @@ void handleGetRoot() {
   response += "<table id=\"monitoring\"><tbody><tr><td class=\"value\">";
   response += boilerTemp.getTemperature();
   response += "&deg;C</td><td class=\"value\">";
-  response += calculateCurrentPower();
+  response += heatingPowerSensor.getPower();
   response += "KW</td><td class=\"value\">";
   response += flowSensor.getLitresPerMinute();
   response += "L/min</td><td class=\"value\">";
@@ -102,12 +102,20 @@ void handleApiGetStatus() {
   flowSensorJson["litresPerMinute"] = flowSensor.getLitresPerMinute();
   
   JsonObject powerJson = root.createNestedObject("power");
-  powerJson["heating"] = calculateCurrentPower(); 
+  powerJson["heating"] = heatingPowerSensor.getPower(); 
+  powerJson["heating1m"] = heatingPowerSensor.getPower_1m(); 
+  powerJson["heating15m"] = heatingPowerSensor.getPower_15m(); 
+  powerJson["heating1h"] = heatingPowerSensor.getPower_1h(); 
+  powerJson["heating24h"] = heatingPowerSensor.getPower_24h(); 
+  powerJson["heating7d"] = heatingPowerSensor.getPower_7d(); 
 
   JsonObject valvesJson = root.createNestedObject("valves");
   for(int i=0; i<valvesCount; i++) {
     valvesJson[valves[i]->getName()] = valves[i]->getValue();
   }
+
+  JsonObject workflowJson = root.createNestedObject("workflow");
+  workflow.printStatus(workflowJson);
 
   sendJsonResponse(root);
   notBusy();
@@ -211,15 +219,8 @@ void handleApiGetConfig() {
   
   StaticJsonDocument<BUFFER_SIZE> root;
   
-  JsonArray relays = root.createNestedArray("termoRelays");
-  for (int i = 0; i < termoRelaysCount; i++) {
-    JsonObject relayConfig = relays.createNestedObject();
-    TermoRelay *relay = termoRelays[i];
-    relayConfig["name"] = (char*)relay->getName();
-    relayConfig["onTemp"] = relay->getOnTemp();
-    relayConfig["offTemp"] = relay->getOffTemp();
-  }
-  
+  //TODO - implement load and return of config
+
   sendJsonResponse(root);
   notBusy();
 }

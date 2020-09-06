@@ -1,18 +1,14 @@
 #include "ServoController.h"
 #include <EspDebug.h>
 
-ServoController::ServoController(const char *servoName, unsigned long servoPin, unsigned long syncInterval, unsigned long antiStallInterval, unsigned long activeTime, ServoValueSupplier getValueFn){
+ServoController::ServoController(const char *servoName, unsigned long servoPin, int minValue, int maxValue, unsigned long syncInterval, unsigned long antiStallInterval, unsigned long activeTime){
   this->servoName = servoName;
   this->servoPin = servoPin;
+  this->minValue = minValue;
+  this->maxValue = maxValue;
   this->syncInterval = syncInterval;
   this->antiStallInterval = antiStallInterval;
   this->activeTime = activeTime;
-  this->getValueFn = getValueFn;
-}
-
-void ServoController::sync(){
-  syncValue();
-  syncAntiStall();
 }
 
 const char *ServoController::getName(){
@@ -26,18 +22,17 @@ const int ServoController::getValue(){
 void ServoController::syncAntiStall(){
   if (isTimeForSync(lastAntiStallSyncTime,  antiStallInterval)){
     DEBUG_PRINTF("Starting anti-stall procedure for servo: %s\n", getName());
-    sendServoValue(100); 
-    sendServoValue(0);
+    sendServoValue(maxValue); 
+    sendServoValue(minValue);
     sendServoValue(currentValue);
     DEBUG_PRINTF("Finished anti-stall procedure for servo: %s\n", getName());
     lastAntiStallSyncTime = millis();
   }
 }    
 
-void ServoController::syncValue(){
+void ServoController::syncValue(int newValue){
   if (isTimeForSync(lastServoSyncTime, syncInterval)){
     DEBUG_PRINTF("Recalculating value for servo: %s\n", getName());
-    int newValue = getValueFn();
     if (abs(newValue - currentValue) >= 5){
       //Move servo only in case of significant value changes - make less noises and save servo's live.
       setValue(newValue);

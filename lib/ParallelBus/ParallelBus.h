@@ -3,11 +3,10 @@
 
 class ParallelBus{
   private:
-    const int *addr; 
     int state[8] = {0,0,0,0,0,0,0,0};
 
   public: 
-    ParallelBus(const int *addr);
+    ParallelBus();
 
     void sync();
 

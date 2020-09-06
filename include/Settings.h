@@ -4,44 +4,26 @@
 ////////////////////////////////////////////////////////////////////////////
 // Tunable settings (to be tuned and changes for each board)
 
-// Temperature settings
-#define HEATING_PUMP_ON 35   //Temperature when heating pump starts
-#define HEATING_PUMP_OFF 30  //Temperature when heating pump stops (to prevent heating loss)
-
-#define ANTIFREEZE_PUMP_ON  5  //Temperature when pump start to prevent boiler freeze
-#define ANTIFREEZE_PUMP_OFF 10 //Temperature when pump stops (freezing has been prevented)
-
-//TODO - this heater does not work. Reconfigure when fixed
-#define HEATER_1_ON  0 //Temperature to turn on the first heater
-#define HEATER_1_OFF 5 //Temperature to turn off the first heater
-
-#define HEATER_2_ON  15  //Temperature to turn on the second heater
-#define HEATER_2_OFF 40  //Temperature to turn off the first heater
-
-#define HEATER_3_ON  15  //Temperature to turn on the third heater 
-#define HEATER_3_OFF 43  //Temperature to turn off the first heater
-
-#define BOILER_COOLER_ON 85    //Boiler temperature to start cooler to prevent overheating
-#define BOILER_COOLER_OFF 75   //Boiler temperature to stop cooler 
-
-#define FLUE_COOLER_ON  110  //Flue temperature to start cooler to prevent teprerature sensors overheating
-#define FLUE_COOLER_OFF 75   //Flue temperature to stop cooler 
-
 // Timings
 #define BUS_SYNC_DELAY     1000       //Delay between resyncing state of the parallel bus
-#define TERMO_SYNC_DELAY   10000      //Delay between temperaature sensor readings
-#define PUMP_CHECK_DELAY   10000      //Delay between checks if pump relay is in a correct state
+#define TERMO_SYNC_DELAY   2000      //Delay between temperaature sensor readings
 
 //Valves configuration (controlled by servos)
-#define FLUE_VALVE_PIN                    5        //B6
+#define FLUE_VALVE_PIN                    6        //A7
 #define FLUE_VALVE_SYNC_INTERVAL          20000    //Each 20 seconds (needs to be interactive to control overheating)
 #define FLUE_VALVE_ANTI_STALL_INTERVAL    86400000 //Each 24 hours = 24 * 60 * 60 * 1000 ms
 #define FLUE_VALVE_ACTIVE_TIME            1000     //Time to power the servo (should be enough to rotate)        
+#define FLUE_VALVE_OPEN_VALUE             10       //Value when flue valse is fully open
+#define FLUE_VALVE_CLOSED_VALUE           90       //Value when flue valse is closed
+#define FLUE_VALVE_DEFAULT_VALUE          40       //Value when flue is partially open  (default for heating)
 
-#define BOILER_VALVE_PIN                   6         //B7
+#define BOILER_VALVE_PIN                   7         //A8
 #define BOILER_VALVE_SYNC_INTERVAL         1800000   //Each 30 minutes = 30 * 60 * 60 * 1000 ms
 #define BOILER_VALVE_ANTI_STALL_INTERVAL   604800000 //Each 7 days = 7 * 24 * 60 * 60 * 1000 ms
-#define BOILER_VALVE_ACTIVE_TIME           1000      //Time to power the servo (should be enough to rotate)        
+#define BOILER_VALVE_ACTIVE_TIME           1000      //Time to power the servo (should be enough to rotate)
+#define BOILER_VALVE_OPEN_VALUE            20        //Value when boiler valve is open (max temperature)
+#define BOILER_VALVE_CLOSED_VALUE          100       //Value when boiler valve is closed (min temperature)
+#define BOILER_VALVE_DEFAULT_VALUE         40        //Default value, when heating is needed (before fire has been detected)
 
 //////////////////////////////////////////////////////////////////////////////
 // Hardware settings (pins to devices allocation)
@@ -58,8 +40,13 @@
 
 //Device to board pin mapping
 #define PIN_TERMO       _D5    // Pin for termo sensors only (including on board sensor)
-#define PIN_DIGITAL_IO  _D4    // General purpose digital IO pin, exposed outside
+#define PIN_DIGITAL_IO1 _D4    // General purpose digital IO pin, exposed outside
+//#define PIN_DIGITAL_IO2 _D9    // General purpose digital IO pin, exposed outside - TODO - detect this from schematic
 #define PIN_ANALOG_IN    A0    // Analog read
+
+#define PIN_LED         _D2    // Onboard led
+#define LED_OFF 1
+#define LED_ON 0
 
 //Pins for cummunication with serial to parallel out port adapter
 #define PIN_SET     _D12           

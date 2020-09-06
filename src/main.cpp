@@ -14,21 +14,26 @@
 #include <Switch.h>
 #include <ConsulRegistration.h>
 #include <FlowSensor.h>
+#include <HeatingPowerSensor.h>
 #include <TermoRelay.h>
 #include <ConditionalRelay.h>
 #include <ServoController.h>
-#include <TemperatureSensor.h>
+#include <DallasTemperatureSensor.h>
+#include <HighTemperatureSensor.h>
 
 #include "WiFiCredentials.h"
 #include "Settings.h"
+
+#include <Workflow.h>
 
 //////////////////////////////////////////////////
 //Temperature sensors addresses (do not forget to disable dev board sensors upon merge)
 
 #ifdef DEBUG_BOARD
 
-const char *SERVICE_NAME = "boiler-v2-dev";    //"-dev" indicates development board.
-DeviceAddress boardSensorAddress   = {40, 255, 81, 242, 35, 23, 3, 118};   //DEV board sensor
+const char *SERVICE_NAME = "heating-dev";    //"-dev" indicates development board.
+// DeviceAddress boardSensorAddress   = {40, 101, 180, 11, 11, 0, 0, 51};   //SMD DEV board sensor
+DeviceAddress boardSensorAddress   = { 40, 255, 55, 222, 35, 23, 3, 153};   //DIP DEV board sensor
 DeviceAddress &boilerSensorAddress = boardSensorAddress;
 DeviceAddress &feedSensorAddress   = boardSensorAddress;
 DeviceAddress &returnSensorAddress  = boardSensorAddress;
@@ -38,8 +43,8 @@ DeviceAddress &flueSensorAddress  = boardSensorAddress;
 
 #else //DEBUG_BOARD
 
-const char *SERVICE_NAME = "boiler-v2";    
-DeviceAddress boardSensorAddress   = {40, 255, 239, 232,  35,  23,  3, 184};   //Different for each board
+const char *SERVICE_NAME = "heating";    
+DeviceAddress boardSensorAddress   = {40, 101, 180,  11,  11,   0,  0,  51};   //Different for each board
 DeviceAddress boilerSensorAddress  = {40,   0,   9,   0, 226,  56, 34, 161};
 DeviceAddress feedSensorAddress    = {40,   0,   9,   0,   1, 110, 34,  95};
 DeviceAddress returnSensorAddress  = {40,   0,   9,   0, 245,  57, 34,  85};
@@ -54,34 +59,17 @@ DeviceAddress flueSensorAddress  =   {40, 255, 232,  17,  36,  23,  3, 113};
 const int bits_no_select[] = {0,0,0,0,0,0,0,0};
 const int bits_all_select[] = {1,1,1,1,1,1,1,1};
 
-const int BUS_ADDR_A[] = {1,0,0};
-const int BUS_ADDR_B[] = {0,1,0};
-const int BUS_ADDR_C[] = {0,0,1};
-const int BUS_ADDR_ALL[] = {1,1,1};
-
-ParallelBus busA(BUS_ADDR_A);
-ParallelBus busB(BUS_ADDR_B);
-ParallelBus busC(BUS_ADDR_C);
-
-//////////////////////////////////////////////////
-// Water flow control
-Switch flowSensorPower(busA, 7, "flowSensor");
-FlowSensor flowSensor(PIN_DIGITAL_IO, &flowSensorPower);
+ParallelBus busA;
 
 ////////////////////////////////////////////////
 // LED indicators
-Switch ledWiFi(busB, 0, "ledWifi");
-Switch ledConsul(busB, 1, "ledConsul");
-Switch ledTemp(busB, 2, "ledTemp");
-Switch ledBusy(busB, 3, "ledBusy");
-Switch ledAlarm(busB, 4, "ledAlarm");
 
 void busy(){
-  ledBusy.turnOn();  
+  digitalWrite(PIN_LED, LED_ON);
 }
 
 void notBusy(){
-  ledBusy.turnOff();  
+  digitalWrite(PIN_LED, LED_OFF);
 }
 
 
@@ -89,165 +77,72 @@ void notBusy(){
 // Temperature sensors
 OneWire oneWire(ONE_WIRE_BUS); 
 DallasTemperature sensors(&oneWire);
-TemperatureSensor boardTemp(sensors, boardSensorAddress, "boardTemperature", &ledTemp);
-TemperatureSensor boilerTemp(sensors, boilerSensorAddress, "boilerTemperature", &ledTemp);
-TemperatureSensor feedTemp(sensors, feedSensorAddress, "feedTemperature", &ledTemp);
-TemperatureSensor returnTemp(sensors, returnSensorAddress, "returnTemperature", &ledTemp);
-TemperatureSensor outsideTemp(sensors, outsideSensorAddress,"outsideTemperature", &ledTemp);
-TemperatureSensor insideTemp(sensors, insideSensorAddress, "insideTemperature", &ledTemp);
-TemperatureSensor flueTemp(sensors, flueSensorAddress, "flueTemperature", &ledTemp);
+DallasTemperatureSensor boardTemp(sensors, boardSensorAddress, "boardTemperature");
+DallasTemperatureSensor boilerTemp(sensors, boilerSensorAddress, "boilerTemperature");
+DallasTemperatureSensor feedTemp(sensors, feedSensorAddress, "feedTemperature");
+DallasTemperatureSensor returnTemp(sensors, returnSensorAddress, "returnTemperature");
+DallasTemperatureSensor outsideTemp(sensors, outsideSensorAddress,"outsideTemperature");
+DallasTemperatureSensor insideTemp(sensors, insideSensorAddress, "insideTemperature");
+DallasTemperatureSensor flueTemp(sensors, flueSensorAddress, "flueTemperature");
+HighTemperatureSensor exhaustTemp(PIN_ANALOG_IN, "exhaustTemperature");
 
-TemperatureSensor* tempSensors[] = {&boardTemp, &boilerTemp, &feedTemp, &returnTemp, &outsideTemp, &insideTemp, &flueTemp}; 
+TemperatureSensor* tempSensors[] = {&boardTemp, &boilerTemp, &feedTemp, &returnTemp, &outsideTemp, &insideTemp, &flueTemp, &exhaustTemp}; 
 int tempSensorsCount = sizeof(tempSensors) / sizeof(tempSensors[0]);  
   
 ////////////////////////////////////////////////
 // Relays (bit 0 = relay 1, bit 1 = relay 2 etc)
 Switch pumpRelay(busA, 0, "pump");
 Switch pump2Relay(busA, 1, "pump2"); //Placeholder for now. This is a support for secondary pump
+Switch coolerRelay(busA, 2, "cooler");
 Switch heaterRelay1(busA, 3, "heater1");
 Switch heaterRelay2(busA, 4, "heater2");
 Switch heaterRelay3(busA, 5, "heater3");
-Switch coolerRelay(busA, 2, "cooler");
-
-TermoRelay pump(HEATING_PUMP_ON, HEATING_PUMP_OFF, &pumpRelay, &ledAlarm, true);
-TermoRelay pumpNoFreeze(ANTIFREEZE_PUMP_ON, ANTIFREEZE_PUMP_OFF, &pumpRelay, &ledAlarm, true);
-TermoRelay heater1(HEATER_1_ON, HEATER_1_OFF, &heaterRelay1, &ledAlarm); 
-TermoRelay heater2(HEATER_2_ON, HEATER_2_OFF, &heaterRelay2, &ledAlarm); 
-TermoRelay heater3(HEATER_3_ON, HEATER_3_OFF, &heaterRelay3, &ledAlarm); 
-
-TermoRelay* termoRelays[] = {&pumpNoFreeze, &pump, &heater1, &heater2, &heater3}; 
-int termoRelaysCount = sizeof(termoRelays) / sizeof(termoRelays[0]);
-
-TermoRelay* boilerDependentTermoRelays[] = {&pumpNoFreeze, &pump, &heater1, &heater2, &heater3}; 
-int boilerDependentTermoRelaysCount = sizeof(boilerDependentTermoRelays) / sizeof(boilerDependentTermoRelays[0]);
 
 Switch* switches[] = {
   &pumpRelay, &pump2Relay, 
   &heaterRelay1, &heaterRelay2, &heaterRelay3, 
-  &coolerRelay, 
-  &flowSensorPower, 
-  &ledWiFi, &ledConsul, &ledTemp, &ledBusy, &ledAlarm
+  &coolerRelay
 };
 int switchesCount = sizeof(switches) / sizeof(switches[0]);
 
-
-bool calculateCoolerCondition(bool isOn){
-  float boilerTemperature = boilerTemp.getTemperature();
-  bool onForBoiler = boilerTemperature >= BOILER_COOLER_ON || (isOn && boilerTemperature > BOILER_COOLER_OFF);
-  
-  float flueTemperature = flueTemp.getTemperature();
-  bool onForFlue = flueTemperature >= FLUE_COOLER_ON || (isOn && flueTemperature > FLUE_COOLER_OFF); 
-
-  return onForBoiler || onForFlue; 
-}
-ConditionalRelay cooler(&coolerRelay, calculateCoolerCondition); 
+//////////////////////////////////////////////////
+// Water flow control and heating power
+FlowSensor flowSensor(PIN_DIGITAL_IO1);
+HeatingPowerSensor heatingPowerSensor(&feedTemp, &returnTemp, &flowSensor);
 
 //////////////////////////////////////////////////////////////////////////
 // Servos
 
 //TODO: Remove and write normal code
-//Servo controller callback (B6, B7, B8) - this is ugly small hack until libraries are extracted from this code
+//Servo controller callback (A7, A8) - this is ugly small hack until libraries are extracted from this code
 //Right now revos can be on busB only 
 void ICACHE_RAM_ATTR bus_digitalWrite(uint8_t pin, uint8_t val){
-  busB.setBit(pin, val == HIGH);
+  busA.setBit(pin, val == HIGH);
 }
 
-float calculateCurrentPower(){
-  //P = c*(T1-T0)*dm/dt
-  return 4.2 * (feedTemp.getTemperature() - returnTemp.getTemperature()) * flowSensor.getLitresPerMinute() / 60.0;
-}
-
-int calculateFlueValveValue(){
-  float temperature = max(flueTemp.getTemperature(), boilerTemp.getTemperature());
-  if (temperature < -100){
-    return 40; //Default mode - temperature sensor is not working
-  }
-  else if (temperature <= 20){
-    return 0;  
-  }
-  else if (temperature >= 100){
-    return 80;  
-  }
-  else{
-    return 80 - 80 * (1 - (temperature - 20) / (100.0 - 20.0)); //Linear scale between 20 and 100 celsius (20 = 100%, 100 = 0%)  
-  } 
-}
-
-int calculateBoilerValveValue(){
-  //Decide boiler temperature from the outside temperature
-  const int minTemperatureValue = 20; //Servo position with min temperature
-  const int maxTemperatureValue = 100; //Servo position with max temperature
-  const int maxOutsideTemperature = 10;
-  const int minOutsideTemperature = -20;
-  float temperature = outsideTemp.getTemperature();
-  if (temperature < -100){
-    return minTemperatureValue; //Default mode - temperature sensor is not working, so, do not overheat
-  }
-  else if (temperature >= maxOutsideTemperature){
-    return minTemperatureValue;  //Edge case - the warmest weather supported
-  }
-  else if (temperature <= minOutsideTemperature){
-    return maxTemperatureValue;         //Edge case - the coldest weather supported
-  }
-  else{
-    return minTemperatureValue + (maxTemperatureValue - minTemperatureValue) * (maxOutsideTemperature - temperature) / (maxOutsideTemperature - minOutsideTemperature); //linear scale between min and max values
-  }
-}
-
-ServoController flueValve("flueValve", FLUE_VALVE_PIN, FLUE_VALVE_SYNC_INTERVAL, FLUE_VALVE_ANTI_STALL_INTERVAL, FLUE_VALVE_ACTIVE_TIME, calculateFlueValveValue);
-ServoController boilerValve("boilerValve", BOILER_VALVE_PIN, BOILER_VALVE_SYNC_INTERVAL, BOILER_VALVE_ANTI_STALL_INTERVAL, BOILER_VALVE_ACTIVE_TIME, calculateBoilerValveValue);
+ServoController flueValve("flueValve", FLUE_VALVE_PIN, FLUE_VALVE_CLOSED_VALUE, FLUE_VALVE_OPEN_VALUE, FLUE_VALVE_SYNC_INTERVAL, FLUE_VALVE_ANTI_STALL_INTERVAL, FLUE_VALVE_ACTIVE_TIME);
+ServoController boilerValve("boilerValve", BOILER_VALVE_PIN, BOILER_VALVE_CLOSED_VALUE, BOILER_VALVE_OPEN_VALUE, BOILER_VALVE_SYNC_INTERVAL, BOILER_VALVE_ANTI_STALL_INTERVAL, BOILER_VALVE_ACTIVE_TIME);
 ServoController *valves[] = {&flueValve, &boilerValve};
 int valvesCount = sizeof(valves) / sizeof(valves[0]);
 
+Workflow workflow(
+  &outsideTemp, &insideTemp, &boilerTemp, &flueTemp,
+  &flowSensor, 
+  &pumpRelay, &coolerRelay, 
+  &heaterRelay1, &heaterRelay2, &heaterRelay3, 
+  &flueValve, &boilerValve, 
+  &heatingPowerSensor
+);
+
 ///////////////////////////////////////////////////////////////////////////////////////////
 // Controller setup and main loop
-
-unsigned long lastPumpCheckTime = 0;
-void checkPumpRelay(){
-  if (lastPumpCheckTime == 0 || millis() - lastPumpCheckTime > PUMP_CHECK_DELAY){
-    if (pumpRelay.isOn() && flowSensor.getTicks() > 0 && flowSensor.getLitresPerMinute() < 0.01){
-      //Pump is supposed to be on, but there is no flow, pump relay might be reset. Need to switch it on again.
-      ledAlarm.turnOn();
-      pumpRelay.turnOff();
-      delay(500);
-      pumpRelay.turnOn();
-      ledAlarm.turnOff();
-    }
-    lastPumpCheckTime = millis();
-  }
-}
 
 unsigned long lastBusSyncTime = 0;
 void syncBus(){
   if (lastBusSyncTime == 0 || millis() - lastBusSyncTime > BUS_SYNC_DELAY){
     //Flush states to buses (to prevent them from random status changes due to interference)	
     busA.sync();
-    busB.sync();
-    busC.sync();
     lastBusSyncTime = millis();
-  }
-}
-
-unsigned long lastSyncTime = 0;
-void syncTermoRelays(){
-  if (lastSyncTime == 0 || millis() - lastSyncTime > TERMO_SYNC_DELAY){
-    
-    //Relays, dependent on builer temperature.
-    float currentBoilerTemp = boilerTemp.getTemperature();
-    for (int i=0; i<boilerDependentTermoRelaysCount; i++){
-      boilerDependentTermoRelays[i]->processTemp(currentBoilerTemp);
-    }
-
-    //Conditional relays.
-    cooler.sync();
-    
-    lastSyncTime = millis();
-  }
-}
-
-void syncValves(){
-  for (int i=0; i<valvesCount; i++){
-    valves[i]->sync();
   }
 }
 
@@ -264,17 +159,34 @@ void setupBus(){
 // Code responsible for WiFi server funtionality
 
 const int REGISTRATION_REFRESH_INTERVAL = 60000;
-ConsulRegistration registration(SERVICE_NAME, REGISTRATION_REFRESH_INTERVAL, &ledWiFi, &ledConsul);
+ConsulRegistration registration(SERVICE_NAME, REGISTRATION_REFRESH_INTERVAL);
 
 const int SERVER_PORT = 80;
 ESP8266WebServer server(SERVER_PORT);
 
+bool isInWifi = false;
 void processServer() {
   server.handleClient();
-  registration.refresh();
+  if (isInWifi){
+    registration.refresh();
+  }
 }
 
+void onGotIP(const WiFiEventStationModeGotIP& event){
+  DEBUG_PRINT_LN("Connected and got IP.");
+	isInWifi = true;     
+}
+
+void onDisconnect(const WiFiEventStationModeDisconnected& event){
+	isInWifi = false;
+}
+
+WiFiEventHandler onConnectHandler, onDisconnectHandler, onIPHandler;
+
 void connectToWiFi() {
+  onDisconnectHandler = WiFi.onStationModeDisconnected(onDisconnect);
+  onIPHandler = WiFi.onStationModeGotIP(onGotIP);
+  WiFi.persistent(false);
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
   DEBUG_PRINTF("Connecting to WiFi: %s\n", ssid);
@@ -310,20 +222,24 @@ void setupServer() {
 }
 
 void setup() {
+  busy();
+
   DEBUG_INIT();
+  pinMode(PIN_LED, OUTPUT);
   setupBus();
   setupServer();
+  
+  notBusy();
 }
 
 #ifndef DEBUG_MODE
 
 void loop() {
-  syncTermoRelays();  
-  flowSensor.syncSpeed(); 
-  processServer();  
-  syncValves();
   syncBus();
-  checkPumpRelay();
+  flowSensor.syncSpeed();
+  heatingPowerSensor.sync();
+  workflow.sync();
+  processServer();  
 }
 
 #else //DEBUG_MODE

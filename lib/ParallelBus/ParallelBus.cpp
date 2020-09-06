@@ -8,36 +8,31 @@ void ICACHE_RAM_ATTR _bus_pulsePin(int pin){
   digitalWrite(pin, LOW);
 }
 
-void ICACHE_RAM_ATTR _bus_sendBits(const int addr[], const int bits[]){
-  for (int i=0; i<3; i++){
-    digitalWrite(PIN_DATA, addr[i] ? HIGH : LOW);
-    _bus_pulsePin(PIN_CLK);
-  }
-  for (int i=0; i<8; i++){
+void ICACHE_RAM_ATTR _bus_sendBits(const int bits[]){
+  for (int i=7; i>=0; i--){
     digitalWrite(PIN_DATA, bits[i] ? HIGH : LOW);
     _bus_pulsePin(PIN_CLK);
   }
   _bus_pulsePin(PIN_SET);
 }
 
-void ICACHE_RAM_ATTR _bus_sync(const int addr[], const int bits[]){
+void ICACHE_RAM_ATTR _bus_sync(const int bits[]){
   noInterrupts();
-  _bus_sendBits(addr, bits);    
+  _bus_sendBits(bits);    
   interrupts();
 }
 
-ParallelBus::ParallelBus(const int *addr){
-  this->addr = addr;
+ParallelBus::ParallelBus(){
   sync(); //initialize on creation
 }
 
 void ICACHE_RAM_ATTR ParallelBus::sync(){
-  _bus_sync(addr, state);
+  _bus_sync(state);
 }
 
 void ICACHE_RAM_ATTR ParallelBus::setBit(int bitNo, bool isOn){
   this->state[bitNo] = isOn ? 1 : 0;
-  _bus_sync(addr, state);
+  _bus_sync(state);
 }
 
 bool ICACHE_RAM_ATTR ParallelBus::getBit(int bitNo){
