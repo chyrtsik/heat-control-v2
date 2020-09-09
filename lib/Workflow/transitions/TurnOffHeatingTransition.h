@@ -5,6 +5,7 @@
 #include <TemperatureSensor.h>
 #include <FlowSensor.h>
 #include <HeatingPowerSensor.h>
+#include "TurnOnHeatingTransition.h"
 
 class TurnOffHeatingTransition : public WorkflowTransition
 {
@@ -12,11 +13,13 @@ class TurnOffHeatingTransition : public WorkflowTransition
     TemperatureSensor *outside;
     FlowSensor *flow;
     HeatingPowerSensor *heatingPower;
+    TurnOnHeatingTransition *turnOnHeating;
 
-    TurnOffHeatingTransition(TemperatureSensor *outside, FlowSensor *flow, HeatingPowerSensor *heatingPower){
+    TurnOffHeatingTransition(TemperatureSensor *outside, FlowSensor *flow, HeatingPowerSensor *heatingPower, TurnOnHeatingTransition *turnOnHeating){
       this->outside = outside;
       this->flow = flow;
       this->heatingPower = heatingPower;
+      this->turnOnHeating = turnOnHeating;
     }
 
   private: 
@@ -42,7 +45,8 @@ class TurnOffHeatingTransition : public WorkflowTransition
     }
 
     bool canHappen(){
-      return isTooHot() || (isWarmEnough() && isTooLittleHeatingPower());
+      //Checking for turn on prevents edge case, when both conditions can happen at the same time. 
+      return !turnOnHeating->canHappen() && (isTooHot() || (isWarmEnough() && isTooLittleHeatingPower()));
     }
 };
 

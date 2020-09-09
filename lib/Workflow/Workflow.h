@@ -49,7 +49,7 @@ class Workflow {
       HeatingPowerSensor *heatingPower
     ) 
     : turnOnHeatingTransition(outside, inside, flow, pump)
-    , turnOffHeatingTransition(outside, flow, heatingPower)
+    , turnOffHeatingTransition(outside, flow, heatingPower, &turnOnHeatingTransition)
     , pumpChecker(pump, flow)
     , overHeatingErrorTransition(boiler)
     , temperatureSensorErrorTransition(boiler)
