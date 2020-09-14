@@ -15,8 +15,6 @@
 #include <ConsulRegistration.h>
 #include <FlowSensor.h>
 #include <HeatingPowerSensor.h>
-#include <TermoRelay.h>
-#include <ConditionalRelay.h>
 #include <ServoController.h>
 #include <DallasTemperatureSensor.h>
 #include <HighTemperatureSensor.h>

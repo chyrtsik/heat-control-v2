@@ -26,8 +26,6 @@ class Workflow {
     std::map<WorkflowState*, std::map<WorkflowTransition*, WorkflowState*>*> nodes;
     WorkflowState *currentState; 
     
-    PumpChecker pumpChecker;
-
     IdleState idleState;
     HeatingState heatingState;
     ErrorState errorState;
@@ -50,16 +48,15 @@ class Workflow {
     ) 
     : turnOnHeatingTransition(outside, inside, flow, pump)
     , turnOffHeatingTransition(outside, flow, heatingPower, &turnOnHeatingTransition)
-    , pumpChecker(pump, flow)
     , overHeatingErrorTransition(boiler)
     , temperatureSensorErrorTransition(boiler)
     , unexpectedHeatingErrorTransition(boiler, flue, &turnOnHeatingTransition)
     , pumpFailureErrorTransition(pump, flow)
     , idleState(flueServo, boilerServo, pump, flow)
-    , heatingState(boiler, outside, flue, pump, cooler, heater1, heater2, heater3, flueServo, boilerServo, &pumpChecker)
+    , heatingState(boiler, outside, flue, pump, cooler, heater1, heater2, heater3, flueServo, boilerServo)
     , errorState( 
         {&overHeatingErrorTransition, &temperatureSensorErrorTransition,&unexpectedHeatingErrorTransition, &pumpFailureErrorTransition}, 
-        pump, cooler, heater1, heater2, heater3, flueServo, boilerServo, &pumpChecker
+        pump, cooler, heater1, heater2, heater3, flueServo, boilerServo
       )
      {
         currentState = &idleState;

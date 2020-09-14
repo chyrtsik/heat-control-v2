@@ -2,7 +2,6 @@
 #define __HEATING_STATE__INCLUDED__
 
 #include "../WorkflowState.h"
-#include "../common/PumpChecker.h"
 
 #include <TemperatureSensor.h>
 #include <Switch.h>
@@ -27,7 +26,6 @@ class HeatingState : public WorkflowState
     Switch *pump, *cooler;
     Switch *heater1, *heater2, *heater3;
     ServoController *flueServo, *boilerServo;
-    PumpChecker *pumpChecker;
 
   private:
     float calculateWorkingTemperature(float outsideTemperature){
@@ -128,8 +126,7 @@ class HeatingState : public WorkflowState
       TemperatureSensor *boiler, TemperatureSensor *outside, TemperatureSensor *flue,
       Switch *pump, Switch *cooler, 
       Switch *heater1, Switch *heater2, Switch *heater3, 
-      ServoController *flueServo, ServoController *boilerServo, 
-      PumpChecker *pumpChecker
+      ServoController *flueServo, ServoController *boilerServo
     ){
       this->boiler = boiler;
       this->outside = outside;
@@ -141,7 +138,6 @@ class HeatingState : public WorkflowState
       this->heater3 = heater3;
       this->flueServo = flueServo;
       this->boilerServo = boilerServo;
-      this->pumpChecker = pumpChecker;
     }
 
     const char* getName(){
@@ -166,14 +162,13 @@ class HeatingState : public WorkflowState
     }
     
     void sync(){
-      pumpChecker->check();
       syncHeater();
       syncFlueCooler();
       syncServos();
     }
     
     bool canExit(){
-      return !pumpChecker->isBusy();
+      return true; //Override in case there will be operation which cannot be cancelled.
     }
 
     void onExit(){
