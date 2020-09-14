@@ -2,7 +2,6 @@
 #define __ERROR_STATE__INCLUDED__
 
 #include "../WorkflowState.h"
-#include "../common/PumpChecker.h"
 #include "../WorkflowTransition.h"
 
 #include <list>
@@ -18,7 +17,6 @@ class ErrorState : public WorkflowState
     Switch *alarm, *pump, *cooler;
     Switch *heater1, *heater2, *heater3;
     ServoController *flueServo, *boilerServo;
-    PumpChecker *pumpChecker;
 
     bool originalPumpValue, originalCoolerValue;
     int originalFlueServoValue, originalBoilerServoValue;
@@ -35,9 +33,7 @@ class ErrorState : public WorkflowState
     }
 
     void enableErrorMode(){
-      if (!pumpChecker->isBusy()){
-        pump->turnOn();
-      }
+      pump->turnOn();
       cooler->turnOn();
       heater1->turnOff();
       heater2->turnOff();
@@ -65,8 +61,7 @@ class ErrorState : public WorkflowState
       TriggersList triggers, 
       Switch *pump, Switch *cooler, 
       Switch *heater1, Switch *heater2, Switch *heater3, 
-      ServoController *flueServo, ServoController *boilerServo, 
-      PumpChecker *pumpChecker
+      ServoController *flueServo, ServoController *boilerServo
     ){
       this->triggers = triggers;
       this->pump = pump;
@@ -76,7 +71,6 @@ class ErrorState : public WorkflowState
       this->heater3 = heater3;
       this->flueServo = flueServo;
       this->boilerServo = boilerServo;
-      this->pumpChecker = pumpChecker;
     }
 
     const char* getName(){ 
@@ -105,12 +99,11 @@ class ErrorState : public WorkflowState
     }
     
     void sync(){
-      pumpChecker->check();
       reEnableErrorMode();
     }
     
     bool canExit(){
-      return !(pumpChecker->isBusy() || hasActiveTriggers());
+      return !hasActiveTriggers();
     }
 
     void onExit(){
