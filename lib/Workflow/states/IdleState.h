@@ -57,7 +57,8 @@ class IdleState : public WorkflowState
     }
     
     bool canExit(){
-      return true; //Override in case there will be operation which cannot be cancelled.
+      //Override in case there will be operation which cannot be cancelled.
+      return !pumpFlowMeasurer.isBusy();
     }
 
     void onExit(){
