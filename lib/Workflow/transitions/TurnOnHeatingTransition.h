@@ -46,6 +46,10 @@ class TurnOnHeatingTransition : public WorkflowTransition
     }
 
     bool canHappen(){
+      if (pumpFlowMeasurer.isBusy()){
+        pumpFlowMeasurer.getLastMeasuredFlow(); //Just keep measurement until it is done
+        return false;
+      }
       return isTooCold() || (isColdENoughToTryFlow() ? hasEnoughWaterFlow() : false);
     }
 };
