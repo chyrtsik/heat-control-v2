@@ -14,7 +14,7 @@
 #define SECOND_HEATER_ENGAGE_TEMPERATURE -10.0
 
 #define HEATER_MAX_TEMPERATURE  55.0  //Max working temperature for electric heater
-#define HEATER_MIN_TEMPERATURE  35.0  //Min working temperature for electric heater
+#define HEATER_MIN_TEMPERATURE  40.0  //Min working temperature for electric heater
 #define HEATER_DELTA_TEMPERATURE 2.5  //Delta around working heater temperature which is allowed
 
 #define FLUE_COOLER_ON  110  //Flue temperature to start cooler to prevent teprerature sensors overheating
