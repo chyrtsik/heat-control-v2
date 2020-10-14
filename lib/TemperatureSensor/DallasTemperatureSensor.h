@@ -8,11 +8,19 @@ class DallasTemperatureSensor : public TemperatureSensor {
   private:
     DallasTemperature *sensors;
     DeviceAddress *sensorAddress;
+    float offset;
 
   public:
     DallasTemperatureSensor(DallasTemperature &sensors, DeviceAddress &sensorAddress, const char *sensorName) : TemperatureSensor(sensorName){
       this->sensors = &sensors;
       this->sensorAddress = &sensorAddress;
+      this->offset = 0;
+    }
+
+    DallasTemperatureSensor(DallasTemperature &sensors, DeviceAddress &sensorAddress, const char *sensorName, float offset) : TemperatureSensor(sensorName){
+      this->sensors = &sensors;
+      this->sensorAddress = &sensorAddress;
+      this->offset = offset;
     }
 
   protected:
@@ -42,7 +50,7 @@ class DallasTemperatureSensor : public TemperatureSensor {
 
     float receiveSensorTemp(){
       sensors->requestTemperaturesByAddress(*sensorAddress);
-      return sensors->getTempC(*sensorAddress);
+      return sensors->getTempC(*sensorAddress) + offset;
     }
  
 };

@@ -77,7 +77,7 @@ OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
 DallasTemperatureSensor boardTemp(sensors, boardSensorAddress, "boardTemperature");
 DallasTemperatureSensor boilerTemp(sensors, boilerSensorAddress, "boilerTemperature");
-DallasTemperatureSensor feedTemp(sensors, feedSensorAddress, "feedTemperature");
+DallasTemperatureSensor feedTemp(sensors, feedSensorAddress, "feedTemperature", 1.0); 
 DallasTemperatureSensor returnTemp(sensors, returnSensorAddress, "returnTemperature");
 DallasTemperatureSensor outsideTemp(sensors, outsideSensorAddress,"outsideTemperature");
 DallasTemperatureSensor insideTemp(sensors, insideSensorAddress, "insideTemperature");
