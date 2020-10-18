@@ -9,7 +9,7 @@
 
 //TODO - place these values to config 
 #define MAX_OUTSITE_TEMPERATURE 20.0
-#define MIN_OUTSIDE_TEMPERATURE -20.0
+#define MIN_OUTSIDE_TEMPERATURE -10.0
 
 #define SECOND_HEATER_ENGAGE_TEMPERATURE -10.0
 
