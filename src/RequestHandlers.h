@@ -36,7 +36,7 @@ void handleGetRoot() {
   DEBUG_PRINT_LN("Processing GET /");
 
   //Monitoring
-  String response = "<style>#monitoring{width: 100%;} .value{font-size: xx-large;} </style>";
+  String response = "<style>#monitoring{width: 100%;} .value{font-size: xx-large;} .button{width: 100%;height: 20%;font-size: xx-large;}</style>";
   response += "<table id=\"monitoring\"><tbody><tr><td class=\"value\">";
   response += boilerTemp.getTemperature();
   response += "&deg;C</td><td class=\"value\">";
@@ -52,8 +52,8 @@ void handleGetRoot() {
 
   //Heating control
   response += "</p>";
-  response += "<form method='POST' action='/status?switches.heater2=on&switches.heater3=on'><input type='submit' value='Electric heating ON' style='width: 100%;height: 20%;font-size: xx-large;'></form>";
-  response += "<form method='POST' action='/status?switches.heater2=off&switches.heater3=off'><input type='submit' value='Electric heating OFF' style='width: 100%;height: 20%;font-size: xx-large;'></form>";
+  response += "<form method='POST' action='/status?workflow-state=Heating'><input type='submit' value='Electric heating ON' class='button'></form>";
+  response += "<form method='POST' action='/status?workflow-state=Idle'><input type='submit' value='Electric heating OFF' class='button'></form>";
 
   //Version of other info  
   response += "<p>Build date and time: " + calculateVersion() + "</p>";
@@ -182,6 +182,11 @@ bool applyNewStatus(){
           }
         }
       }
+    }
+    else if (argName.equals("workflow-state")){
+      String stateName = server.arg(i);
+      DEBUG_PRINTF("Moving workflow to state %s\n", stateName.c_str());
+      workflow.activateState(stateName.c_str());
     }
   }
   return true;

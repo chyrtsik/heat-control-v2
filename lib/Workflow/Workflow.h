@@ -30,6 +30,8 @@ class Workflow {
     HeatingState heatingState;
     ErrorState errorState;
 
+    WorkflowState *states[3];
+    
     OverHeatingErrorTransition overHeatingErrorTransition;
     TemperatureSensorErrorTransition temperatureSensorErrorTransition;
     UnexpectedHeatingErrorTransition unexpectedHeatingErrorTransition;
@@ -60,6 +62,9 @@ class Workflow {
       )
      {
         currentState = &idleState;
+        states[0] = &idleState;
+        states[1] = &heatingState;
+        states[2] = &errorState;
         
         initTransition(&idleState, &errorState, &temperatureSensorErrorTransition);
         initTransition(&idleState, &errorState, &unexpectedHeatingErrorTransition);
@@ -82,6 +87,26 @@ class Workflow {
       }
     }
 
+    /**
+     * Attempt moving workflow to the given state. Returns true in case it is successful.
+     */
+    bool activateState(const char* stateName){
+      WorkflowState *newState = findStateByName(stateName);
+      if (newState != NULL){
+          if (currentState->canExit() && newState->canEnter()){
+            DEBUG_PRINTF("Workflow: about to override state from %s to %s\n", currentState->getName(), newState->getName());
+            currentState->onExit();
+            currentState = newState;
+            currentState->onEnter();
+            DEBUG_PRINTF("Workflow: finished override to %s state\n", currentState->getName());
+          }
+      }
+      return false;
+    }
+
+    /**
+     * Dump current worflow status to the given json
+     */
     void printStatus(JsonObject &workflowJsonNode){
       JsonObject stateJsonNode = workflowJsonNode.createNestedObject("currentState");
       stateJsonNode["name"] = currentState->getName();
@@ -102,7 +127,7 @@ class Workflow {
           std::map<WorkflowTransition*, WorkflowState*> *outgoing = nodes[currentState];
           std::map<WorkflowTransition*, WorkflowState*>::iterator it;
           for (it = outgoing->begin(); it != outgoing->end(); it++){
-            if (it->first->canHappen()){
+            if (it->first->canHappen() && it->second->canEnter()){
               DEBUG_PRINTF("Workflow: about to change state from %s to %s\n", currentState->getName(), it->second->getName());
               currentState->onExit();
               currentState = it->second;
@@ -124,6 +149,14 @@ class Workflow {
         nodes[from] = outgoing;
       }
       (*outgoing)[transition] = to;
+    }
+
+    WorkflowState* findStateByName(const char *stateName){
+      for (unsigned int i=0; i<sizeof(states) / sizeof(states[0]); i++){
+        if (strcmp(states[i]->getName(), stateName) == 0){
+          return states[i];
+        }
+      }
     }
 };
 
