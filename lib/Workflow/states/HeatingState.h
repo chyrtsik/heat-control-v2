@@ -71,7 +71,9 @@ class HeatingState : public WorkflowState
 
     bool isFireHeatingEngaged(){
       float boilerTemperature = boiler->getTemperature();
-      return boiler->getTemperature() > HEATER_MAX_TEMPERATURE + HEATER_DELTA_TEMPERATURE   //Boiler cannot become due to electric heater
+      float outsideTemperature = outside->getTemperature();
+      float workingTemperature = calculateWorkingTemperature(outsideTemperature);
+      return boiler->getTemperature() > workingTemperature + HEATER_DELTA_TEMPERATURE + 1   //Boiler cannot become due to electric heater
           || flue->getTemperature() > boilerTemperature;                                    //Flue is only hot when there is a fire 
     }
 

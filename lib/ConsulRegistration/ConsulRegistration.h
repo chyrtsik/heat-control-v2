@@ -14,7 +14,7 @@ class ConsulRegistration{
     unsigned long lastRefresh;
 
     char requestBuffer[512] = {};
-    const char *consulEndpoint = "http://192.168.2.10:8500/v1/catalog/register"; //TODO - extract to config
+    const char *consulEndpoint = "http://consul.service.consul:8500/v1/catalog/register"; //TODO - extract to config
 
   public:
     ConsulRegistration(const char *serviceName, int refreshInterval);
