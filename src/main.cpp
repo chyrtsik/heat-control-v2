@@ -92,8 +92,8 @@ int tempSensorsCount = sizeof(tempSensors) / sizeof(tempSensors[0]);
 Switch pumpRelay(busA, 0, "pump");
 Switch pump2Relay(busA, 1, "pump2"); //Placeholder for now. This is a support for secondary pump
 Switch coolerRelay(busA, 2, "cooler");
-Switch heaterRelay1(busA, 3, "heater1");
-Switch heaterRelay2(busA, 4, "heater2");
+Switch heaterRelay1(busA, 4, "heater1");
+Switch heaterRelay2(busA, 3, "heater2");
 Switch heaterRelay3(busA, 5, "heater3");
 
 Switch* switches[] = {
