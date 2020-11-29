@@ -11,7 +11,7 @@
 #define MAX_OUTSITE_TEMPERATURE 20.0
 #define MIN_OUTSIDE_TEMPERATURE -10.0
 
-#define SECOND_HEATER_ENGAGE_TEMPERATURE -10.0
+#define SECOND_HEATER_ENGAGE_TEMPERATURE 5.0
 
 #define HEATER_MAX_TEMPERATURE  55.0  //Max working temperature for electric heater
 #define HEATER_MIN_TEMPERATURE  30.0  //Min working temperature for electric heater
@@ -73,7 +73,7 @@ class HeatingState : public WorkflowState
       float boilerTemperature = boiler->getTemperature();
       float outsideTemperature = outside->getTemperature();
       float workingTemperature = calculateWorkingTemperature(outsideTemperature);
-      return boiler->getTemperature() > workingTemperature + HEATER_DELTA_TEMPERATURE + 1   //Boiler cannot become due to electric heater
+      return boiler->getTemperature() > workingTemperature + HEATER_DELTA_TEMPERATURE * 2   //Boiler cannot become due to electric heater
           || flue->getTemperature() > boilerTemperature;                                    //Flue is only hot when there is a fire 
     }
 
