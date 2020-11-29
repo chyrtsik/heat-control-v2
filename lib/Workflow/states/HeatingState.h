@@ -45,18 +45,26 @@ class HeatingState : public WorkflowState
     }
 
     void syncHeater(){
-      float boilerTemperature = boiler->getTemperature();
-      float outsideTemperature = outside->getTemperature();
-      float workingTemperature = calculateWorkingTemperature(outsideTemperature);
-      if (boilerTemperature < workingTemperature - HEATER_DELTA_TEMPERATURE){
-        heater1->turnOn(); //TODO - implement check for power needed and engage more then one heater is required
-        if (isNeedSecondHeater(boilerTemperature, workingTemperature, outsideTemperature)){
-          heater2->turnOn();
-        }
-      }
-      else if (boilerTemperature > workingTemperature + HEATER_DELTA_TEMPERATURE){
+      if (isFireHeatingEngaged()){
+        //Fire heating is used, no need for electic heating
         heater1->turnOff(); 
         heater2->turnOff();
+      }
+      else{
+        //Electic heating is used
+        float boilerTemperature = boiler->getTemperature();
+        float outsideTemperature = outside->getTemperature();
+        float workingTemperature = calculateWorkingTemperature(outsideTemperature);
+        if (boilerTemperature < workingTemperature - HEATER_DELTA_TEMPERATURE){
+          heater1->turnOn(); //TODO - implement check for power needed and engage more then one heater is required
+          if (isNeedSecondHeater(boilerTemperature, workingTemperature, outsideTemperature)){
+            heater2->turnOn();
+          }
+        }
+        else if (boilerTemperature > workingTemperature + HEATER_DELTA_TEMPERATURE){
+          heater1->turnOff(); 
+          heater2->turnOff();
+        }
       }
     }
 
@@ -115,9 +123,21 @@ class HeatingState : public WorkflowState
     }
 
     void syncServos(){
+      static bool isFireHeatingEngagedBefore = false;
       if (isFireHeatingEngaged()){
-        flueServo->syncValue(calculateFlueValveValue());
-        boilerServo->syncValue(calculateBoilerValveValue());
+        if (!isFireHeatingEngagedBefore){
+          //Initiate fire heating - ensure, that servos are in the correct state (they might have moved due to electronic interference) 
+          flueServo->setValue(calculateFlueValveValue());
+          boilerServo->setValue(calculateBoilerValveValue());
+        }
+        else{
+          flueServo->syncValue(calculateFlueValveValue());
+          boilerServo->syncValue(calculateBoilerValveValue());
+        }
+        isFireHeatingEngagedBefore = true;
+      }
+      else{
+        isFireHeatingEngagedBefore = false;
       }
       flueServo->syncAntiStall();
       boilerServo->syncAntiStall();
