@@ -81,8 +81,8 @@ class HeatingState : public WorkflowState
       float boilerTemperature = boiler->getTemperature();
       float outsideTemperature = outside->getTemperature();
       float workingTemperature = calculateWorkingTemperature(outsideTemperature);
-      return boiler->getTemperature() > workingTemperature + HEATER_DELTA_TEMPERATURE * 2   //Boiler cannot become due to electric heater
-          || flue->getTemperature() > boilerTemperature;                                    //Flue is only hot when there is a fire 
+      return boiler->getTemperature() > workingTemperature + HEATER_DELTA_TEMPERATURE * 1.5   //Boiler cannot so hot become due to electric heater
+          || flue->getTemperature() > boilerTemperature;                                      //Flue is only hot when there is a fire 
     }
 
     int calculateFlueValveValue(){
