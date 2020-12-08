@@ -39,7 +39,13 @@ class ErrorState : public WorkflowState
       heater2->turnOff();
       heater3->turnOff();
       flueServo->setValue(FLUE_VALVE_CLOSED_VALUE);
+      
+      //Ensure to close the door as tight as possible by flaping it
+      boilerServo->setValue(BOILER_VALVE_OPEN_VALUE);
       boilerServo->setValue(BOILER_VALVE_CLOSED_VALUE);
+      boilerServo->setValue(BOILER_VALVE_OPEN_VALUE);
+      boilerServo->setValue(BOILER_VALVE_CLOSED_VALUE);
+      
       lastEnabledErrorMode = millis();
     }
 
