@@ -94,7 +94,7 @@ class HeatingState : public WorkflowState
       }
       else if (temperature <= minFlueTemperature){
         return FLUE_VALVE_OPEN_VALUE;  
-      }
+      } 
       else if (temperature >= maxFlueTemperature){
         return FLUE_VALVE_CLOSED_VALUE;  
       }
@@ -105,8 +105,8 @@ class HeatingState : public WorkflowState
 
     int calculateBoilerValveValue(){
       //Decide boiler temperature from the outside temperature
-      const int maxOutsideTemperature = 10;
-      const int minOutsideTemperature = -20;
+      const int maxOutsideTemperature = 5;
+      const int minOutsideTemperature = -15;
       float temperature = outside->getTemperature();
       if (temperature < -100){
         return BOILER_VALVE_CLOSED_VALUE; //Default mode - temperature sensor is not working, so, do not overheat
