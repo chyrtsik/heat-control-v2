@@ -18,6 +18,7 @@
 #define HEATER_DELTA_TEMPERATURE 2.5  //Delta around working heater temperature which is allowed
 
 #define FLUE_COOLER_ON  110  //Flue temperature to start cooler to prevent teprerature sensors overheating
+#define MAX_ALLOWED_BOILER_TEMPERATURE 75 //Max builder temperature which does not require intervention 
 
 class HeatingState : public WorkflowState
 {
@@ -69,7 +70,7 @@ class HeatingState : public WorkflowState
     }
 
     void syncFlueCooler(){
-      if (flue->getTemperature() > FLUE_COOLER_ON){
+      if (flue->getTemperature() > FLUE_COOLER_ON || boiler->getTemperature() > MAX_ALLOWED_BOILER_TEMPERATURE){
         cooler->turnOn();
       }
       else if (cooler->isOn()) {
@@ -86,7 +87,13 @@ class HeatingState : public WorkflowState
     }
 
     int calculateFlueValveValue(){
-      float temperature = max(flue->getTemperature(), boiler->getTemperature());
+      float boilerTemperature = boiler->getTemperature();
+      if (boilerTemperature > MAX_ALLOWED_BOILER_TEMPERATURE){
+        //Prevent potential overheating by minimizing excaust air flow
+        return FLUE_VALVE_CLOSED_VALUE;
+      }
+
+      float temperature = max(flue->getTemperature(), boilerTemperature);
       const int maxFlueTemperature = 100;
       const int minFlueTemperature = 20;
       if (temperature < -100){
@@ -104,12 +111,17 @@ class HeatingState : public WorkflowState
     }
 
     int calculateBoilerValveValue(){
+      //Ensure shutdown air flow in case of being close to overheat
+      if (boiler->getTemperature() > MAX_ALLOWED_BOILER_TEMPERATURE){
+        return BOILER_VALVE_CLOSED_VALUE;
+      }
+
       //Decide boiler temperature from the outside temperature
       const int maxOutsideTemperature = 5;
       const int minOutsideTemperature = -15;
       float temperature = outside->getTemperature();
       if (temperature < -100){
-        return BOILER_VALVE_CLOSED_VALUE; //Default mode - temperature sensor is not working, so, do not overheat
+        return BOILER_VALVE_DEFAULT_VALUE; //Default mode - temperature sensor is not working, so, do not overheat
       }
       else if (temperature >= maxOutsideTemperature){
         return BOILER_VALVE_CLOSED_VALUE;  //Edge case - the warmest weather supported
