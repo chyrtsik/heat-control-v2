@@ -94,7 +94,7 @@ class HeatingState : public WorkflowState
       }
 
       float workingTemperature = calculateWorkingTemperature(outside->getTemperature());
-      float temperature = max(flue->getTemperature(), boilerTemperature + (boilerTemperature - workingTemperature) * 3);
+      float temperature = max(flue->getTemperature(), boilerTemperature + (boilerTemperature - workingTemperature) * 2.5F);
       const int maxFlueTemperature = 100;
       const int minFlueTemperature = 20;
       if (temperature < -100){
