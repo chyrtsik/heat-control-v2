@@ -18,7 +18,7 @@
 #define FLUE_VALVE_DEFAULT_VALUE          0        //Value when flue is partially open  (default for heating)
 
 #define BOILER_VALVE_PIN                   7         //A8
-#define BOILER_VALVE_SYNC_INTERVAL         1800000   //Each 30 minutes = 30 * 60 * 60 * 1000 ms
+#define BOILER_VALVE_SYNC_INTERVAL         600000    //Each 10 minutes = 10 * 60 * 60 * 1000 ms
 #define BOILER_VALVE_ANTI_STALL_INTERVAL   604800000 //Each 7 days = 7 * 24 * 60 * 60 * 1000 ms
 #define BOILER_VALVE_ACTIVE_TIME           1000      //Time to power the servo (should be enough to rotate)
 #define BOILER_VALVE_OPEN_VALUE            0         //Value when boiler valve is open (max temperature)
