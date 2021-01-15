@@ -93,8 +93,9 @@ class HeatingState : public WorkflowState
         return FLUE_VALVE_CLOSED_VALUE;
       }
 
-      float workingTemperature = calculateWorkingTemperature(outside->getTemperature());
-      float temperature = max(flue->getTemperature(), boilerTemperature + (boilerTemperature - workingTemperature) * 2.5F);
+      float outsideTemperature = outside->getTemperature();
+      float workingTemperature = calculateWorkingTemperature(outsideTemperature);
+      float temperature = max(flue->getTemperature(), boilerTemperature + (boilerTemperature - workingTemperature + outsideTemperature) * 2.5F);
       const int maxFlueTemperature = 100;
       const int minFlueTemperature = 20;
       if (temperature < -100){
