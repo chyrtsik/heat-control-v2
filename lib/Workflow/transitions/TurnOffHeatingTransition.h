@@ -33,6 +33,7 @@ class TurnOffHeatingTransition : public WorkflowTransition
 
     bool isTooLittleHeatingPower(){
       return 
+        heatingPower->getPower_1m() < heatingPower->getPower_15m() && 
         heatingPower->getPower_15m() < 0.5 && 
         heatingPower->getPower_15m() < heatingPower->getPower_1h() &&
         heatingPower->getPower_1h() < heatingPower->getPower_24h();
