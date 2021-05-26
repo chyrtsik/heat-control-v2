@@ -11,7 +11,7 @@
 #define TURN_ON_HEATING_FLOW_CHECK_DURATION         30000     //Measure flow for long enough
 #define TURN_ON_HEATING_FLOW_THRESHOLD              12.0      //Value above this trigger heating enabling (some of heating devices are open for heating) 
 #define TURN_ON_HEATING_TRY_TEMPERATURE_THRESHOLD   18.0      //Min temperature to start checking the need for heating
-#define TURN_ON_HEATING_TRY_INSITE_TEMPERATURE_THRESHOLD   23.0      //Inside temperature to try heating
+#define TURN_ON_HEATING_TRY_INSITE_TEMPERATURE_THRESHOLD   24.0      //Inside temperature to try heating
 #define TURN_ON_HEATING_FORCE_TEMPERATURE_THRESHOLD 1.0       //Min temperature to start heating unconditionally
 
 class TurnOnHeatingTransition : public WorkflowTransition
