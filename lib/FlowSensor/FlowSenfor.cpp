@@ -34,5 +34,6 @@ float FlowSensor::getLitresTotal(){
 }
 
 float FlowSensor::getLitresPerMinute(){
-  return ticksPerMinute * LITRES_PER_TICK;
+    //TODO - never merge this !!! 
+  return 10.0;//ticksPerMinute * LITRES_PER_TICK;
 }
