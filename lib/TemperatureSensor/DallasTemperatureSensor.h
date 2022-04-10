@@ -4,11 +4,15 @@
 #include "TemperatureSensor.h"
 #include <DallasTemperature.h>
 
+#define TEMP_NAN_VALUE -99999.0
+#define TEMP_MAX_DIFF 5.0         //Max supported difference between subsequent temperature measurements
+
 class DallasTemperatureSensor : public TemperatureSensor {
   private:
     DallasTemperature *sensors;
     DeviceAddress *sensorAddress;
     float offset;
+    float lastTemp = TEMP_NAN_VALUE;
 
   public:
     DallasTemperatureSensor(DallasTemperature &sensors, DeviceAddress &sensorAddress, const char *sensorName) : TemperatureSensor(sensorName){
@@ -26,11 +30,15 @@ class DallasTemperatureSensor : public TemperatureSensor {
   protected:
     float measureTemp(){
       ensureStarted();
-      float temp = receiveSensorTemp(); 
-      if (temp == ERROR_TEMP_VALUE){
+      float temp = receiveSensorTemp();
+      if (lastTemp == TEMP_NAN_VALUE){
+          lastTemp = temp;
+      } 
+      if (temp == ERROR_TEMP_VALUE || fabs(temp - lastTemp) > TEMP_MAX_DIFF){
         resetSensors(); //Reset once in case sensors hang. But only once to ensure, that the value is not the actual measurement.
         temp = receiveSensorTemp();
       }
+      lastTemp = temp;
       return temp;
     }
 
