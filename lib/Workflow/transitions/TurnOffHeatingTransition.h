@@ -7,6 +7,10 @@
 #include <HeatingPowerSensor.h>
 #include "TurnOnHeatingTransition.h"
 
+#define TURN_OFF_HEATING_MAX_CONSUMED_POWER          0.5       //Min power consumed by the house to turn off heating
+#define TURN_OFF_HEATING_TRY_TEMPERATURE_THRESHOLD   8.0       //Min temperature to turn off heating
+#define TURN_OFF_HEATING_FORCE_TEMPERATURE_THRESHOLD 20.0      //Min temperature to stop heating unconditionally
+
 class TurnOffHeatingTransition : public WorkflowTransition
 {
   public:
@@ -24,17 +28,17 @@ class TurnOffHeatingTransition : public WorkflowTransition
 
   private: 
     bool isTooHot(){
-      return outside->getTemperature() >= 20;   //TODO - make this configurable
+      return outside->getTemperature() >= TURN_OFF_HEATING_TRY_TEMPERATURE_THRESHOLD;
     }
 
     bool isWarmEnough(){
-      return outside->getTemperature() >= 8;   //TODO - make this configurable
+      return outside->getTemperature() >= TURN_OFF_HEATING_FORCE_TEMPERATURE_THRESHOLD;
     }
 
     bool isTooLittleHeatingPower(){
       return 
         heatingPower->getPower_1m() < heatingPower->getPower_15m() && 
-        heatingPower->getPower_15m() < 0.5 && 
+        heatingPower->getPower_15m() < TURN_OFF_HEATING_MAX_CONSUMED_POWER && 
         heatingPower->getPower_15m() < heatingPower->getPower_1h() &&
         heatingPower->getPower_1h() < heatingPower->getPower_24h();
     }
