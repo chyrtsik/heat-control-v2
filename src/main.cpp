@@ -20,6 +20,7 @@
 #include <HighTemperatureSensor.h>
 
 #include "WiFiCredentials.h"
+#include "HeatingConfig.h"
 #include "Settings.h"
 
 #include <Workflow.h>
