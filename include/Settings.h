@@ -25,8 +25,8 @@
 #define BOILER_VALVE_CLOSED_VALUE          100       //Value when boiler valve is closed (min temperature)
 #define BOILER_VALVE_DEFAULT_VALUE         50        //Default value, when heating is needed (before fire has been detected)
 
-//Heating configuration 
-#define MAX_OUTSITE_TEMPERATURE 20.0
+//Heating state configuration 
+#define MAX_OUTSIDE_TEMPERATURE 20.0
 #define MIN_OUTSIDE_TEMPERATURE -10.0
 
 #define SECOND_HEATER_ENGAGE_TEMPERATURE 5.0
