@@ -20,11 +20,11 @@ class HeatingState : public WorkflowState
       if (outsideTemperature < MIN_OUTSIDE_TEMPERATURE){
         return HEATER_MAX_TEMPERATURE;
       }
-      else if (outsideTemperature > MAX_OUTSITE_TEMPERATURE){
+      else if (outsideTemperature > MAX_OUTSIDE_TEMPERATURE){
         return HEATER_MIN_TEMPERATURE;
       }
       else{
-        return HEATER_MIN_TEMPERATURE + (HEATER_MAX_TEMPERATURE - HEATER_MIN_TEMPERATURE) * (MAX_OUTSITE_TEMPERATURE - outsideTemperature) / (MAX_OUTSITE_TEMPERATURE - MIN_OUTSIDE_TEMPERATURE);
+        return HEATER_MIN_TEMPERATURE + (HEATER_MAX_TEMPERATURE - HEATER_MIN_TEMPERATURE) * (MAX_OUTSIDE_TEMPERATURE - outsideTemperature) / (MAX_OUTSIDE_TEMPERATURE - MIN_OUTSIDE_TEMPERATURE);
       }
     }
 
