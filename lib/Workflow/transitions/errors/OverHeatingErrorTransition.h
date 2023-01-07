@@ -5,8 +5,6 @@
 #include <TemperatureSensor.h>
 #include <FlowSensor.h>
 
-#define ERROR_BOILER_OVER_HEATING_THRESHOLD 85.0  //Min temperature above which boiler is considered overheated
-
 class OverHeatingErrorTransition : public WorkflowTransition
 {
   public:
