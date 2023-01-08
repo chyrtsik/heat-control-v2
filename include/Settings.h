@@ -9,58 +9,58 @@
 #define TERMO_SYNC_DELAY   2000      //Delay between temperaature sensor readings
 
 //Valves configuration (controlled by servos)
-#define FLUE_VALVE_PIN                    6        //A7
-#define FLUE_VALVE_SYNC_INTERVAL          20000    //Each 20 seconds (needs to be interactive to control overheating)
-#define FLUE_VALVE_ANTI_STALL_INTERVAL    86400000 //Each 24 hours = 24 * 60 * 60 * 1000 ms
-#define FLUE_VALVE_ACTIVE_TIME            1000     //Time to power the servo (should be enough to rotate)        
-#define FLUE_VALVE_OPEN_VALUE             0        //Value when flue valse is fully open
-#define FLUE_VALVE_CLOSED_VALUE           100      //Value when flue valse is closed
-#define FLUE_VALVE_DEFAULT_VALUE          0        //Value when flue is partially open  (default for heating)
+#define FLUE_VALVE_PIN  config.configData.flueValve.pin
+#define FLUE_VALVE_SYNC_INTERVAL config.configData.flueValve.syncInterval
+#define FLUE_VALVE_ANTI_STALL_INTERVAL config.configData.flueValve.antiStallInterval
+#define FLUE_VALVE_ACTIVE_TIME config.configData.flueValve.activeTime
+#define FLUE_VALVE_OPEN_VALUE config.configData.vacationMode.enabled ? config.configData.flueValve.closedValue : config.configData.flueValve.openValue
+#define FLUE_VALVE_CLOSED_VALUE config.configData.flueValve.closedValue
+#define FLUE_VALVE_DEFAULT_VALUE config.configData.vacationMode.enabled ? config.configData.flueValve.closedValue : config.configData.flueValve.defaultValue
 
-#define BOILER_VALVE_PIN                   7         //A8
-#define BOILER_VALVE_SYNC_INTERVAL         600000    //Each 10 minutes = 10 * 60 * 60 * 1000 ms
-#define BOILER_VALVE_ANTI_STALL_INTERVAL   604800000 //Each 7 days = 7 * 24 * 60 * 60 * 1000 ms
-#define BOILER_VALVE_ACTIVE_TIME           1000      //Time to power the servo (should be enough to rotate)
-#define BOILER_VALVE_OPEN_VALUE            0         //Value when boiler valve is open (max temperature)
-#define BOILER_VALVE_CLOSED_VALUE          100       //Value when boiler valve is closed (min temperature)
-#define BOILER_VALVE_DEFAULT_VALUE         50        //Default value, when heating is needed (before fire has been detected)
+#define BOILER_VALVE_PIN config.configData.boilerValve.pin
+#define BOILER_VALVE_SYNC_INTERVAL config.configData.boilerValve.syncInterval
+#define BOILER_VALVE_ANTI_STALL_INTERVAL config.configData.boilerValve.antiStallInterval
+#define BOILER_VALVE_ACTIVE_TIME config.configData.boilerValve.activeTime
+#define BOILER_VALVE_OPEN_VALUE config.configData.vacationMode.enabled ? config.configData.boilerValve.closedValue : config.configData.boilerValve.openValue
+#define BOILER_VALVE_CLOSED_VALUE config.configData.boilerValve.closedValue
+#define BOILER_VALVE_DEFAULT_VALUE config.configData.vacationMode.enabled ? config.configData.boilerValve.closedValue : config.configData.boilerValve.defaultValue
 
 //Heating state configuration 
-#define MAX_OUTSIDE_TEMPERATURE 20.0
-#define MIN_OUTSIDE_TEMPERATURE -10.0
+#define MAX_OUTSIDE_TEMPERATURE config.configData.heatingState.maxOutsideTemperature
+#define MIN_OUTSIDE_TEMPERATURE config.configData.heatingState.minOutsideTemperature
 
-#define SECOND_HEATER_ENGAGE_TEMPERATURE 5.0
+#define SECOND_HEATER_ENGAGE_TEMPERATURE config.configData.heatingState.secondHeaterEngageTemperature
 
-#define HEATER_MAX_TEMPERATURE  55.0  //Max working temperature for electric heater
-#define HEATER_MIN_TEMPERATURE  30.0  //Min working temperature for electric heater
-#define HEATER_DELTA_TEMPERATURE 2.5  //Delta around working heater temperature which is allowed
+#define HEATER_MAX_TEMPERATURE config.configData.vacationMode.enabled ? config.configData.vacationMode.electricHeatingMaxTemperature : config.configData.heatingState.electricHeatingMaxTemperature
+#define HEATER_MIN_TEMPERATURE config.configData.vacationMode.enabled ? config.configData.vacationMode.electricHeatingMinTemperature : config.configData.heatingState.electricHeatingMinTemperature
+#define HEATER_DELTA_TEMPERATURE config.configData.vacationMode.enabled ? config.configData.vacationMode.electricHeatingDeltaTemperature : config.configData.heatingState.electricHeatingDeltaTemperature
 
-#define FLUE_COOLER_ON  110  //Flue temperature to start cooler to prevent teprerature sensors overheating
-#define MAX_ALLOWED_BOILER_TEMPERATURE 75 //Max builder temperature which does not require intervention 
+#define FLUE_COOLER_ON config.configData.heatingState.flueCoolerOnTemperature
+#define MAX_ALLOWED_BOILER_TEMPERATURE config.configData.heatingState.maxAllowedBoilerTemperature
 
 //Idle state configuration
-#define IDLE_TIME_BETWEEN_FLOW_CHECKS 604800000 //Each 7 days = 14 * 24 * 60 * 60 * 1000 ms
-#define IDLE_FLOW_CHECK_DURATION      60000     //1 minute = 1 * 60 * 1000 ms
-#define IDLE_PUMP_HEALTHY_FLOW_THRESHOLD 8.0
+#define IDLE_TIME_BETWEEN_FLOW_CHECKS config.configData.idleState.timeBetweenFlowChecks
+#define IDLE_FLOW_CHECK_DURATION config.configData.idleState.idleFlowCheckDuration
+#define IDLE_PUMP_HEALTHY_FLOW_THRESHOLD config.configData.idleState.pumpHealthyFlowThreshold
 
 //Heating turn on / turn off transitions
-#define TURN_ON_HEATING_TIME_BETWEEN_FLOW_CHECKS    7200000   //Check pump each 2 hours  
-#define TURN_ON_HEATING_FLOW_CHECK_DURATION         30000     //Measure flow for long enough
-#define TURN_ON_HEATING_FLOW_THRESHOLD              12.0      //Value above this triggers heating enabling (some of heating devices are open for heating) 
-#define TURN_ON_HEATING_TRY_TEMPERATURE_THRESHOLD   18.0      //Min temperature to start checking the need for heating
-#define TURN_ON_HEATING_TRY_INSITE_TEMPERATURE_THRESHOLD   24.0      //Inside temperature to try heating
-#define TURN_ON_HEATING_FORCE_TEMPERATURE_THRESHOLD 1.0       //Min temperature to start heating unconditionally
+#define TURN_ON_HEATING_TIME_BETWEEN_FLOW_CHECKS config.configData.heatingTurnOn.timeBetweenFlowChecks
+#define TURN_ON_HEATING_FLOW_CHECK_DURATION config.configData.heatingTurnOn.flowCheckDuration
+#define TURN_ON_HEATING_FLOW_THRESHOLD config.configData.heatingTurnOn.flowThreshold
+#define TURN_ON_HEATING_TRY_TEMPERATURE_THRESHOLD config.configData.vacationMode.enabled ? config.configData.vacationMode.heatingTurnOnMaxOutsideTemperature : config.configData.heatingTurnOn.maxOutsideTemperature
+#define TURN_ON_HEATING_TRY_INSITE_TEMPERATURE_THRESHOLD config.configData.vacationMode.enabled ? config.configData.vacationMode.heatingTurnOnMaxInsideTemperature : config.configData.heatingTurnOn.maxInsideTemperature
+#define TURN_ON_HEATING_FORCE_TEMPERATURE_THRESHOLD config.configData.heatingTurnOn.outsideTemperatureToForceHeatingOn
 
-#define TURN_OFF_HEATING_MAX_CONSUMED_POWER          0.5       //Min power consumed by the house to turn off heating
-#define TURN_OFF_HEATING_TRY_TEMPERATURE_THRESHOLD   8.0       //Min temperature to turn off heating
-#define TURN_OFF_HEATING_FORCE_TEMPERATURE_THRESHOLD 20.0      //Min temperature to stop heating unconditionally
+#define TURN_OFF_HEATING_MAX_CONSUMED_POWER config.configData.heatingTurnOff.heatingPowerThreshold
+#define TURN_OFF_HEATING_TRY_TEMPERATURE_THRESHOLD config.configData.vacationMode.enabled ? config.configData.vacationMode.heatingTurnOffMinOutsideTemperature : config.configData.heatingTurnOff.minOutsideTemperature
+#define TURN_OFF_HEATING_FORCE_TEMPERATURE_THRESHOLD config.configData.vacationMode.enabled ? config.configData.vacationMode.heatingTurnOffOutsideTemperatureToForceHeatingOff : config.configData.heatingTurnOff.outsideTemperatureToForceHeatingOff
 
 //Errors configuration
-#define ERROR_BOILER_OVER_HEATING_THRESHOLD 85.0  //Min temperature above which boiler is considered overheated
+#define ERROR_BOILER_OVER_HEATING_THRESHOLD config.configData.errors.boilerOverheatingThreshold
 
-#define PUMP_FAILURE_FLOW_THRESHOLD 1.0     //Min flow which is valid for pump
-#define PUMP_FAILURE_MIN_TIME       10000   //Min time pump should be active to check for error
-#define PUMP_FAILURE_EXPIRATION     5000    //Min time to expire error (so that short pump turn on / off do not disable this error)   
+#define PUMP_FAILURE_FLOW_THRESHOLD config.configData.errors.pumpFailureFlowThreshold
+#define PUMP_FAILURE_MIN_TIME config.configData.errors.pumpFailureMinTime
+#define PUMP_FAILURE_EXPIRATION config.configData.errors.pumpFailureExpiration
 
 
 
