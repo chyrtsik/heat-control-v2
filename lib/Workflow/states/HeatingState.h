@@ -7,18 +7,6 @@
 #include <Switch.h>
 #include <ServoController.h>
 
-#define MAX_OUTSITE_TEMPERATURE 20.0
-#define MIN_OUTSIDE_TEMPERATURE -10.0
-
-#define SECOND_HEATER_ENGAGE_TEMPERATURE 5.0
-
-#define HEATER_MAX_TEMPERATURE  55.0  //Max working temperature for electric heater
-#define HEATER_MIN_TEMPERATURE  30.0  //Min working temperature for electric heater
-#define HEATER_DELTA_TEMPERATURE 2.5  //Delta around working heater temperature which is allowed
-
-#define FLUE_COOLER_ON  110  //Flue temperature to start cooler to prevent teprerature sensors overheating
-#define MAX_ALLOWED_BOILER_TEMPERATURE 75 //Max builder temperature which does not require intervention 
-
 class HeatingState : public WorkflowState
 {
   private:
@@ -32,11 +20,11 @@ class HeatingState : public WorkflowState
       if (outsideTemperature < MIN_OUTSIDE_TEMPERATURE){
         return HEATER_MAX_TEMPERATURE;
       }
-      else if (outsideTemperature > MAX_OUTSITE_TEMPERATURE){
+      else if (outsideTemperature > MAX_OUTSIDE_TEMPERATURE){
         return HEATER_MIN_TEMPERATURE;
       }
       else{
-        return HEATER_MIN_TEMPERATURE + (HEATER_MAX_TEMPERATURE - HEATER_MIN_TEMPERATURE) * (MAX_OUTSITE_TEMPERATURE - outsideTemperature) / (MAX_OUTSITE_TEMPERATURE - MIN_OUTSIDE_TEMPERATURE);
+        return HEATER_MIN_TEMPERATURE + (HEATER_MAX_TEMPERATURE - HEATER_MIN_TEMPERATURE) * (MAX_OUTSIDE_TEMPERATURE - outsideTemperature) / (MAX_OUTSIDE_TEMPERATURE - MIN_OUTSIDE_TEMPERATURE);
       }
     }
 

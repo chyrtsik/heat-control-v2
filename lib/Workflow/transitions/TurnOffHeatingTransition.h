@@ -7,10 +7,6 @@
 #include <HeatingPowerSensor.h>
 #include "TurnOnHeatingTransition.h"
 
-#define TURN_OFF_HEATING_MAX_CONSUMED_POWER          0.5       //Min power consumed by the house to turn off heating
-#define TURN_OFF_HEATING_TRY_TEMPERATURE_THRESHOLD   8.0       //Min temperature to turn off heating
-#define TURN_OFF_HEATING_FORCE_TEMPERATURE_THRESHOLD 20.0      //Min temperature to stop heating unconditionally
-
 class TurnOffHeatingTransition : public WorkflowTransition
 {
   public:
