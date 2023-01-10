@@ -13,17 +13,17 @@
 #define FLUE_VALVE_SYNC_INTERVAL config.configData.flueValve.syncInterval
 #define FLUE_VALVE_ANTI_STALL_INTERVAL config.configData.flueValve.antiStallInterval
 #define FLUE_VALVE_ACTIVE_TIME config.configData.flueValve.activeTime
-#define FLUE_VALVE_OPEN_VALUE config.configData.vacationMode.enabled ? config.configData.flueValve.closedValue : config.configData.flueValve.openValue
+#define FLUE_VALVE_OPEN_VALUE (config.configData.vacationMode.enabled ? config.configData.flueValve.closedValue : config.configData.flueValve.openValue)
 #define FLUE_VALVE_CLOSED_VALUE config.configData.flueValve.closedValue
-#define FLUE_VALVE_DEFAULT_VALUE config.configData.vacationMode.enabled ? config.configData.flueValve.closedValue : config.configData.flueValve.defaultValue
+#define FLUE_VALVE_DEFAULT_VALUE (config.configData.vacationMode.enabled ? config.configData.flueValve.closedValue : config.configData.flueValve.defaultValue)
 
 #define BOILER_VALVE_PIN config.configData.boilerValve.pin
 #define BOILER_VALVE_SYNC_INTERVAL config.configData.boilerValve.syncInterval
 #define BOILER_VALVE_ANTI_STALL_INTERVAL config.configData.boilerValve.antiStallInterval
 #define BOILER_VALVE_ACTIVE_TIME config.configData.boilerValve.activeTime
-#define BOILER_VALVE_OPEN_VALUE config.configData.vacationMode.enabled ? config.configData.boilerValve.closedValue : config.configData.boilerValve.openValue
+#define BOILER_VALVE_OPEN_VALUE (config.configData.vacationMode.enabled ? config.configData.boilerValve.closedValue : config.configData.boilerValve.openValue)
 #define BOILER_VALVE_CLOSED_VALUE config.configData.boilerValve.closedValue
-#define BOILER_VALVE_DEFAULT_VALUE config.configData.vacationMode.enabled ? config.configData.boilerValve.closedValue : config.configData.boilerValve.defaultValue
+#define BOILER_VALVE_DEFAULT_VALUE (config.configData.vacationMode.enabled ? config.configData.boilerValve.closedValue : config.configData.boilerValve.defaultValue)
 
 //Heating state configuration 
 #define MAX_OUTSIDE_TEMPERATURE config.configData.heatingState.maxOutsideTemperature
@@ -31,9 +31,9 @@
 
 #define SECOND_HEATER_ENGAGE_TEMPERATURE config.configData.heatingState.secondHeaterEngageTemperature
 
-#define HEATER_MAX_TEMPERATURE config.configData.vacationMode.enabled ? config.configData.vacationMode.electricHeatingMaxTemperature : config.configData.heatingState.electricHeatingMaxTemperature
-#define HEATER_MIN_TEMPERATURE config.configData.vacationMode.enabled ? config.configData.vacationMode.electricHeatingMinTemperature : config.configData.heatingState.electricHeatingMinTemperature
-#define HEATER_DELTA_TEMPERATURE config.configData.vacationMode.enabled ? config.configData.vacationMode.electricHeatingDeltaTemperature : config.configData.heatingState.electricHeatingDeltaTemperature
+#define HEATER_MAX_TEMPERATURE (config.configData.vacationMode.enabled ? config.configData.vacationMode.electricHeatingMaxTemperature : config.configData.heatingState.electricHeatingMaxTemperature)
+#define HEATER_MIN_TEMPERATURE (config.configData.vacationMode.enabled ? config.configData.vacationMode.electricHeatingMinTemperature : config.configData.heatingState.electricHeatingMinTemperature)
+#define HEATER_DELTA_TEMPERATURE (config.configData.vacationMode.enabled ? config.configData.vacationMode.electricHeatingDeltaTemperature : config.configData.heatingState.electricHeatingDeltaTemperature)
 
 #define FLUE_COOLER_ON config.configData.heatingState.flueCoolerOnTemperature
 #define MAX_ALLOWED_BOILER_TEMPERATURE config.configData.heatingState.maxAllowedBoilerTemperature
@@ -47,13 +47,13 @@
 #define TURN_ON_HEATING_TIME_BETWEEN_FLOW_CHECKS config.configData.heatingTurnOn.timeBetweenFlowChecks
 #define TURN_ON_HEATING_FLOW_CHECK_DURATION config.configData.heatingTurnOn.flowCheckDuration
 #define TURN_ON_HEATING_FLOW_THRESHOLD config.configData.heatingTurnOn.flowThreshold
-#define TURN_ON_HEATING_TRY_TEMPERATURE_THRESHOLD config.configData.vacationMode.enabled ? config.configData.vacationMode.heatingTurnOnMaxOutsideTemperature : config.configData.heatingTurnOn.maxOutsideTemperature
-#define TURN_ON_HEATING_TRY_INSITE_TEMPERATURE_THRESHOLD config.configData.vacationMode.enabled ? config.configData.vacationMode.heatingTurnOnMaxInsideTemperature : config.configData.heatingTurnOn.maxInsideTemperature
+#define TURN_ON_HEATING_TRY_TEMPERATURE_THRESHOLD (config.configData.vacationMode.enabled ? config.configData.vacationMode.heatingTurnOnMaxOutsideTemperature : config.configData.heatingTurnOn.maxOutsideTemperature)
+#define TURN_ON_HEATING_TRY_INSITE_TEMPERATURE_THRESHOLD (config.configData.vacationMode.enabled ? config.configData.vacationMode.heatingTurnOnMaxInsideTemperature : config.configData.heatingTurnOn.maxInsideTemperature)
 #define TURN_ON_HEATING_FORCE_TEMPERATURE_THRESHOLD config.configData.heatingTurnOn.outsideTemperatureToForceHeatingOn
 
 #define TURN_OFF_HEATING_MAX_CONSUMED_POWER config.configData.heatingTurnOff.heatingPowerThreshold
-#define TURN_OFF_HEATING_TRY_TEMPERATURE_THRESHOLD config.configData.vacationMode.enabled ? config.configData.vacationMode.heatingTurnOffMinOutsideTemperature : config.configData.heatingTurnOff.minOutsideTemperature
-#define TURN_OFF_HEATING_FORCE_TEMPERATURE_THRESHOLD config.configData.vacationMode.enabled ? config.configData.vacationMode.heatingTurnOffOutsideTemperatureToForceHeatingOff : config.configData.heatingTurnOff.outsideTemperatureToForceHeatingOff
+#define TURN_OFF_HEATING_TRY_TEMPERATURE_THRESHOLD (config.configData.vacationMode.enabled ? config.configData.vacationMode.heatingTurnOffMinOutsideTemperature : config.configData.heatingTurnOff.minOutsideTemperature)
+#define TURN_OFF_HEATING_FORCE_TEMPERATURE_THRESHOLD (config.configData.vacationMode.enabled ? config.configData.vacationMode.heatingTurnOffOutsideTemperatureToForceHeatingOff : config.configData.heatingTurnOff.outsideTemperatureToForceHeatingOff)
 
 //Errors configuration
 #define ERROR_BOILER_OVER_HEATING_THRESHOLD config.configData.errors.boilerOverheatingThreshold
