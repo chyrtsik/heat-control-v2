@@ -204,8 +204,10 @@ void startServer() {
   server.on("/api/config", HTTP_PUT, handleApiPutConfig);
   server.on("/api/sensors", HTTP_GET, handleApiGetSensors);
 
-  server.on("/status", HTTP_POST, handlePostStatus); //Ur for web form to work with status.
-  
+  //Urls for web form to work with endpoints (as not all browsers support PUT).
+  server.on("/status", HTTP_POST, handlePostStatus);
+  server.on("/config", HTTP_POST, handlePostConfig); 
+
   server.on("/update", HTTP_GET, handleGetUpdate);
   server.on("/update", HTTP_POST, handlePostUpdateResult, handlePostUpdate);
   server.on("/reboot", HTTP_GET, handleGetReboot);

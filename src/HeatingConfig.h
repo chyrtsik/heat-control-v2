@@ -83,8 +83,8 @@ private:
 
     struct ConfigData
     {
-        unsigned long configVersion; // Just a magic number to separate junk from real config.
-        unsigned int configSize;     // Size of config structure stored in ROM. It can be used to detect when config structure was changed without changing the version.
+        long configVersion;         // Just a magic number to separate junk from real config.
+        unsigned int configSize;    // Size of config structure stored in ROM. It can be used to detect when config structure was changed without changing the version.
         ValveConfig flueValve;
         ValveConfig boilerValve;
         HeatingStateConfig heatingState;
@@ -96,7 +96,7 @@ private:
     };
 
     // Default values for configuration (used for new empty hardware)
-    static const unsigned long CONFIG_VERSION = (unsigned long)100000000001;
+    static const long CONFIG_VERSION = (long)1000000001;
     static const unsigned int CONFIG_SIZE = sizeof(ConfigData);
 
 public:
@@ -141,6 +141,7 @@ public:
         if (configData.configVersion != CONFIG_VERSION || configData.configSize != CONFIG_SIZE)
         {
             initDefaultConfig();
+            save();
         }
         isChanged = false;
     }
