@@ -6,10 +6,6 @@
 
 #include <ServoController.h>
 
-#define IDLE_TIME_BETWEEN_FLOW_CHECKS 604800000 //Each 7 days = 14 * 24 * 60 * 60 * 1000 ms
-#define IDLE_FLOW_CHECK_DURATION      60000     //1 minute = 1 * 60 * 1000 ms
-#define IDLE_PUMP_HEALTHY_FLOW_THRESHOLD 8.0
-
 class IdleState : public WorkflowState
 { 
   private:  

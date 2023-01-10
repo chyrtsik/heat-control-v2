@@ -6,10 +6,6 @@
 #include <FlowSensor.h>
 #include <Switch.h>
 
-#define PUMP_FAILURE_FLOW_THRESHOLD 1.0     //Min flow which is valid for pump
-#define PUMP_FAILURE_MIN_TIME       10000   //Min time pump should be active to check for error
-#define PUMP_FAILURE_EXPIRATION     5000    //Min time to expire error (so that short pump turn on / off do not disable this error)   
-
 class PumpFailureErrorTransition : public WorkflowTransition
 {
     Switch *pump;
