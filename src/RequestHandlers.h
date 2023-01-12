@@ -64,10 +64,10 @@ void handleGetRoot()
 
     response += "</p>";
     if (config.isVacationModeEnabled()){
-        response += "<form method='POST' action='/config?vacation-mode=off'><input type='submit' value='Turn Off Vacation Mode' class='button'></form>";
+        response += "<form method='POST' action='/config?vacationMode.enabled=false'><input type='submit' value='Turn Off Vacation Mode' class='button'></form>";
     }
     else{
-        response += "<form method='POST' action='/config?vacation-mode=on'><input type='submit' value='Turn On Vacation Mode' class='button'></form>";
+        response += "<form method='POST' action='/config?vacationMode.enabled=true'><input type='submit' value='Turn On Vacation Mode' class='button'></form>";
     }
 
     // Version of other info
@@ -257,9 +257,20 @@ void handleApiGetConfig()
 
     StaticJsonDocument<BUFFER_SIZE> root;
 
-    root["vacationMode"] = config.configData.vacationMode.enabled ? "on" : "off";
     root["configVersion"] = config.configData.configVersion;
     root["configSize"] = config.configData.configSize;
+
+    JsonObject vacationMode = root.createNestedObject("vacationMode");
+    vacationMode["enabled"] = config.configData.vacationMode.enabled;
+    vacationMode["maxOutsideTemperature"] = config.configData.vacationMode.maxOutsideTemperature;
+    vacationMode["minOutsideTemperature"] = config.configData.vacationMode.minOutsideTemperature;
+    vacationMode["electricHeatingMaxTemperature"] = config.configData.vacationMode.electricHeatingMaxTemperature;
+    vacationMode["electricHeatingMinTemperature"] = config.configData.vacationMode.electricHeatingMinTemperature;
+    vacationMode["electricHeatingDeltaTemperature"] = config.configData.vacationMode.electricHeatingDeltaTemperature;
+    vacationMode["heatingTurnOnMaxOutsideTemperature"] = config.configData.vacationMode.heatingTurnOnMaxOutsideTemperature;
+    vacationMode["heatingTurnOnMaxInsideTemperature"] = config.configData.vacationMode.heatingTurnOnMaxInsideTemperature;
+    vacationMode["heatingTurnOffMinOutsideTemperature"] = config.configData.vacationMode.heatingTurnOffMinOutsideTemperature;
+    vacationMode["heatingTurnOffOutsideTemperatureToForceHeatingOff"] = config.configData.vacationMode.heatingTurnOffOutsideTemperatureToForceHeatingOff;
 
     sendJsonResponse(root);
     notBusy();
@@ -270,16 +281,47 @@ bool applyNewConfig()
     for (int i = 0; i < server.args(); i++)
     {
         String argName = server.argName(i);
-        if (argName.equals("vacation-mode"))
+        String argValue = server.arg(i);
+        if (argName.startsWith("vacationMode"))
         {
-            String enabled = server.arg(i);
-            if (enabled.equals("on"))
-            {
-                config.setVacationModeEnabled(true);
+            bool changed = true;
+            //Update vacation mode
+            if (argName.equals("vacationMode.enabled")){
+                config.configData.vacationMode.enabled = argValue.equalsIgnoreCase("true");
+            } 
+            else if (argName.equals("vacationMode.maxOutsideTemperature")){
+                config.configData.vacationMode.maxOutsideTemperature = argValue.toFloat(); 
             }
-            else if (enabled.equals("off"))
-            {
-                config.setVacationModeEnabled(false);
+            else if (argName.equals("vacationMode.minOutsideTemperature")){
+                config.configData.vacationMode.minOutsideTemperature = argValue.toFloat(); 
+            }
+            else if (argName.equals("vacationMode.electricHeatingMaxTemperature")){
+                config.configData.vacationMode.electricHeatingMaxTemperature = argValue.toFloat(); 
+            }
+            else if (argName.equals("vacationMode.electricHeatingMinTemperature")){
+                config.configData.vacationMode.electricHeatingMinTemperature = argValue.toFloat();
+            }
+            else if (argName.equals("vacationMode.electricHeatingDeltaTemperature")){
+                config.configData.vacationMode.electricHeatingDeltaTemperature = argValue.toFloat();
+            }
+            else if (argName.equals("vacationMode.heatingTurnOnMaxOutsideTemperature")){
+                config.configData.vacationMode.heatingTurnOnMaxOutsideTemperature = argValue.toFloat();
+            }
+            else if (argName.equals("vacationMode.heatingTurnOnMaxInsideTemperature")){
+                config.configData.vacationMode.heatingTurnOnMaxInsideTemperature = argValue.toFloat();
+            }
+            else if (argName.equals("vacationMode.heatingTurnOffMinOutsideTemperature")){
+                config.configData.vacationMode.heatingTurnOffMinOutsideTemperature = argValue.toFloat();
+            }
+            else if (argName.equals("vacationMode.heatingTurnOffOutsideTemperatureToForceHeatingOff")){
+                config.configData.vacationMode.heatingTurnOffOutsideTemperatureToForceHeatingOff = argValue.toFloat();
+            }
+            else{
+                changed = false;
+            }
+            if (changed){
+                //Trigger config to become changed so that it will be saved
+                config.makeChanged();
             }
         }
     }
