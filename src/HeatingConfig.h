@@ -70,6 +70,10 @@ private:
     struct VacationModeConfig
     {
         bool enabled;                          // True when heating is working in low-temperature mode, and false in case in normal one.
+        
+        float maxOutsideTemperature;           //Override of max outside temperature for heating calculations
+        float minOutsideTemperature;           //Override of min outside temperature for heating calculations
+        
         float electricHeatingMaxTemperature;   // Override of Max working temperature for electric heater
         float electricHeatingMinTemperature;   // Override of  Min working temperature for electric heater
         float electricHeatingDeltaTemperature; // Override of Delta around working heater temperature which is allowed
@@ -96,7 +100,7 @@ private:
     };
 
     // Default values for configuration (used for new empty hardware)
-    static const long CONFIG_VERSION = (long)1000000001;
+    static const long CONFIG_VERSION = (long)1000000002;
     static const unsigned int CONFIG_SIZE = sizeof(ConfigData);
 
 public:
@@ -117,8 +121,12 @@ public:
         if (isEnabled != configData.vacationMode.enabled)
         {
             configData.vacationMode.enabled = isEnabled;
-            isChanged = true;
+            makeChanged();
         }
+    }
+
+    void makeChanged(){
+        isChanged = true;
     }
 
     void save()
@@ -199,9 +207,11 @@ private:
         configData.errors.pumpFailureExpiration = 50000;
 
         configData.vacationMode.enabled = false;
+        configData.vacationMode.maxOutsideTemperature = 10.0;
+        configData.vacationMode.minOutsideTemperature = -10.0;
         configData.vacationMode.electricHeatingMaxTemperature = 40.0;
         configData.vacationMode.electricHeatingMinTemperature = 20.0;
-        configData.vacationMode.electricHeatingDeltaTemperature = 4.0;
+        configData.vacationMode.electricHeatingDeltaTemperature = 3.0;
         configData.vacationMode.heatingTurnOnMaxOutsideTemperature = 6.0;
         configData.vacationMode.heatingTurnOnMaxInsideTemperature = 8.0;
         configData.vacationMode.heatingTurnOffMinOutsideTemperature = 4.0;

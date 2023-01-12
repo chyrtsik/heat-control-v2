@@ -26,8 +26,8 @@
 #define BOILER_VALVE_DEFAULT_VALUE (config.configData.vacationMode.enabled ? config.configData.boilerValve.closedValue : config.configData.boilerValve.defaultValue)
 
 //Heating state configuration 
-#define MAX_OUTSIDE_TEMPERATURE config.configData.heatingState.maxOutsideTemperature
-#define MIN_OUTSIDE_TEMPERATURE config.configData.heatingState.minOutsideTemperature
+#define MAX_OUTSIDE_TEMPERATURE (config.configData.vacationMode.enabled ? config.configData.vacationMode.maxOutsideTemperature : config.configData.heatingState.maxOutsideTemperature)
+#define MIN_OUTSIDE_TEMPERATURE (config.configData.vacationMode.enabled ? config.configData.vacationMode.minOutsideTemperature : config.configData.heatingState.minOutsideTemperature)
 
 #define SECOND_HEATER_ENGAGE_TEMPERATURE config.configData.heatingState.secondHeaterEngageTemperature
 
