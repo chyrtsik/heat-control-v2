@@ -72,13 +72,8 @@ void handleGetRoot()
 
     // Version of other info
     response += "<p>Build date and time: " + calculateVersion() + "</p>";
-    unsigned long currentTime = millis();
-    int days = currentTime / (24 * 60 * 60 * 1000);
-    response += "<p>Uptime: ";
-    response += days + " days</p>";
 
     sendHtmlResponse(response.c_str());
-
     notBusy();
 }
 
