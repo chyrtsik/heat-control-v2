@@ -112,10 +112,10 @@ HeatingPowerSensor heatingPowerSensor(&feedTemp, &returnTemp, &flowSensor);
 //////////////////////////////////////////////////////////////////////////
 // Servos
 
-//TODO: Remove and write normal code
-//Servo controller callback (A7, A8) - this is ugly small hack until libraries are extracted from this code
-//Right now revos can be on busB only 
+//TODO: Move to the library and get rid of this code here
 void ICACHE_RAM_ATTR bus_digitalWrite(uint8_t pin, uint8_t val){
+  //Servo controller callback (A7, A8) - this is ugly small hack until libraries are extracted from this code
+  //Right now servos can be on busB only 
   busA.setBit(pin, val == HIGH);
 }
 
