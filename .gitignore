@@ -125,3 +125,7 @@
 /cmake-build-esp12e/Testing/Temporary/LastTest.log
 /cmake-build-esp12e/cmake_install.cmake
 /cmake-build-esp12e/heat-control-v2.cbp
+/.vscode
+/*.code-workspace
+/.travis.yml
+/!prebuilt
